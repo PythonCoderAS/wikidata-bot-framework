@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wikidata-bot-framework"
+version = "1.0.0"
+dependencies = ["pywikibot"]
+
+[tool.setuptools.packages.find]
+where = ["wikidata_bot_framework"]
+
