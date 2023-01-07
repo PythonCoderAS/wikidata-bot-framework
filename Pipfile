@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 pywikibot = "*"
+mwparserfromhell = "*"
 
 [dev-packages]
 

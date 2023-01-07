@@ -15,6 +15,7 @@ class ExtraQualifier:
     claim: pywikibot.Claim
     skip_if_conflicting_exists: bool = False
     skip_if_conflicting_language_exists: bool = False
+    make_new_if_conflicting: bool = False
     reference_only: bool = False
 
 
@@ -29,6 +30,12 @@ class ExtraReference:
     )
     retrieved: dataclasses.InitVar[Union[pywikibot.WbTime, Literal[False], None]] = None
 
+    @classmethod
+    def from_reference_claim(cls, claim: pywikibot.Claim, also_match_property_values: bool = False):
+        self = cls()
+        self.add_claim(claim, also_match_property_values)
+        return self
+
     def __post_init__(self, retrieved: Union[pywikibot.WbTime, Literal[False], None]):
         if retrieved is None:
             now = pywikibot.Timestamp.now(tz=datetime.timezone.utc)
@@ -37,6 +44,11 @@ class ExtraReference:
             retrieved_claim = pywikibot.Claim(site, retrieved_prop)
             retrieved_claim.setTarget(retrieved)
             self.new_reference_props[retrieved_prop] = retrieved_claim
+
+    def add_claim(self, claim: pywikibot.Claim, also_match_property_values: bool = False):
+        if also_match_property_values:
+            self.match_property_values[claim.getID()] = claim
+        self.new_reference_props[claim.getID()] = claim
 
     def is_compatible_reference(self, reference: WikidataReference) -> bool:
         if self.url_match_pattern and url_prop in reference:
@@ -62,3 +74,9 @@ class ExtraProperty:
         default_factory=lambda: defaultdict(list)
     )
     extra_references: list[ExtraReference] = dataclasses.field(default_factory=list)
+
+    def add_qualifier(self, qualifier: ExtraQualifier):
+        self.qualifiers[qualifier.claim.getID()].append(qualifier)
+
+    def add_reference(self, reference: ExtraReference):
+        self.extra_references.append(reference)
