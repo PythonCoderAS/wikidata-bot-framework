@@ -4,9 +4,22 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wikidata-bot-framework"
-version = "1.0.0"
+version = "1.0.3"
+description = "A framework for making Wikidata bots."
+readme = "README.md"
 dependencies = ["pywikibot", "mwparserfromhell"]
+requires-python = ">=3.9"
+license = {text = "MIT License"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+
+[project.urls]
+repository = "https://github.com/PythonCoderAS/wikidata-bot-framework"
+
+[tool.setuptools]
+zip-safe = true
 
 [tool.setuptools.packages.find]
-where = ["wikidata_bot_framework"]
+include = ["wikidata_bot_framework*"]
 

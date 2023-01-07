@@ -1,8 +1,7 @@
 import dataclasses
 import datetime
 from collections import defaultdict
-from re import Pattern
-from typing import Literal, MutableMapping, Union
+from typing import Literal, MutableMapping, Union, Pattern
 
 import pywikibot
 from .constants import url_prop, site, retrieved_prop
@@ -24,7 +23,7 @@ class ExtraReference:
     match_property_values: dict[str, pywikibot.Claim] = dataclasses.field(
         default_factory=dict
     )
-    url_match_pattern: Pattern[Union[str], None] = None
+    url_match_pattern: Union[Pattern[str], None] = None
     new_reference_props: dict[str, pywikibot.Claim] = dataclasses.field(
         default_factory=dict
     )
