@@ -3,6 +3,7 @@ from collections import defaultdict
 import pywikibot
 
 from .dataclasses import ExtraProperty
+from typing import List, MutableMapping
 
 
 def add_claim_locally(item: pywikibot.ItemPage,claim: pywikibot.Claim):
@@ -30,7 +31,7 @@ def merge_reference_groups(reference_group: defaultdict[str, list[pywikibot.Clai
             acted = True
     return acted
 
-class OutputHelper(defaultdict):
+class OutputHelper(defaultdict[str, List[ExtraProperty]], MutableMapping[str, List[ExtraProperty]]):
     def __init__(self):
         super().__init__(list)
 
