@@ -5,14 +5,7 @@ import pywikibot
 
 from .constants import site
 from .dataclasses import ExtraProperty, ExtraQualifier, ExtraReference
-from .utils import (
-    OutputHelper,
-    add_claim_locally,
-    add_qualifier_locally,
-    add_reference_locally,
-    append_to_source,
-    merge_reference_groups,
-)
+from .utils import *
 
 Output = Mapping[str, List[ExtraProperty]]
 
