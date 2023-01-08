@@ -1,10 +1,11 @@
 import dataclasses
 import datetime
 from collections import defaultdict
-from typing import Literal, MutableMapping, Union, Pattern
+from typing import Literal, MutableMapping, Pattern, Union
 
 import pywikibot
-from .constants import url_prop, site, retrieved_prop
+
+from .constants import retrieved_prop, site, url_prop
 
 WikidataReference = MutableMapping[str, list[pywikibot.Claim]]
 
@@ -12,10 +13,20 @@ WikidataReference = MutableMapping[str, list[pywikibot.Claim]]
 @dataclasses.dataclass
 class ExtraQualifier:
     claim: pywikibot.Claim
+    """The claim to add as a qualifier."""
     skip_if_conflicting_exists: bool = False
+    """If a qualifier with the same value already exists, don't add it."""
+    replace_if_conflicting_exists: bool = False
+    """If a qualifier with the same value already exists, replace it."""
+    delete_other_if_replacing: bool = False
+    """If ``replace_if_conflicting_exists`` is True and there are multiple values for the same property, delete all 
+    but the one being replaced."""
     skip_if_conflicting_language_exists: bool = False
+    """If a qualifier with the same language already exists, don't add it."""
     make_new_if_conflicting: bool = False
+    """If a qualifier with the same value already exists, make a new claim with the same value."""
     reference_only: bool = False
+    """Do not add the qualifier, instead only use it for adding references."""
 
 
 @dataclasses.dataclass
@@ -30,7 +41,9 @@ class ExtraReference:
     retrieved: dataclasses.InitVar[Union[pywikibot.WbTime, Literal[False], None]] = None
 
     @classmethod
-    def from_reference_claim(cls, claim: pywikibot.Claim, also_match_property_values: bool = False):
+    def from_reference_claim(
+        cls, claim: pywikibot.Claim, also_match_property_values: bool = False
+    ):
         self = cls()
         self.add_claim(claim, also_match_property_values)
         return self
@@ -44,7 +57,9 @@ class ExtraReference:
             retrieved_claim.setTarget(retrieved)
             self.new_reference_props[retrieved_prop] = retrieved_claim
 
-    def add_claim(self, claim: pywikibot.Claim, also_match_property_values: bool = False):
+    def add_claim(
+        self, claim: pywikibot.Claim, also_match_property_values: bool = False
+    ):
         if also_match_property_values:
             self.match_property_values[claim.getID()] = claim
         self.new_reference_props[claim.getID()] = claim
@@ -66,9 +81,18 @@ class ExtraReference:
 @dataclasses.dataclass
 class ExtraProperty:
     claim: pywikibot.Claim
+    """The claim to add."""
     skip_if_conflicting_exists: bool = False
+    """If a claim with the same value already exists, don't add it."""
+    replace_if_conflicting_exists: bool = False
+    """If a claim with the same value already exists, replace it."""
+    delete_other_if_replacing: bool = False
+    """If ``replace_if_conflicting_exists`` is True and there are multiple values for the same property, delete all
+    but the one being replaced."""
     skip_if_conflicting_language_exists: bool = False
+    """If a claim with the same language already exists, don't add it."""
     reference_only: bool = False
+    """Do not add the claim, instead only use it for adding references."""
     qualifiers: defaultdict[str, list[ExtraQualifier]] = dataclasses.field(
         default_factory=lambda: defaultdict(list)
     )

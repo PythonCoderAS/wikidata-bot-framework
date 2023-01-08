@@ -1,14 +1,21 @@
+from abc import ABC, abstractmethod
 from typing import Dict, Iterable, List, Literal, Mapping, Union
 
 import pywikibot
 
-from .dataclasses import ExtraProperty, ExtraQualifier, ExtraReference
-from .utils import add_qualifier_locally, append_to_source, add_claim_locally, add_reference_locally, \
-    merge_reference_groups, OutputHelper
 from .constants import site
-from abc import ABC, abstractmethod
+from .dataclasses import ExtraProperty, ExtraQualifier, ExtraReference
+from .utils import (
+    OutputHelper,
+    add_claim_locally,
+    add_qualifier_locally,
+    add_reference_locally,
+    append_to_source,
+    merge_reference_groups,
+)
 
 Output = Mapping[str, List[ExtraProperty]]
+
 
 class PropertyAdderBot(ABC):
     """A bot that adds properties to pages.
@@ -40,7 +47,10 @@ class PropertyAdderBot(ABC):
         return base
 
     @abstractmethod
-    def run_item(self, item: Union[pywikibot.ItemPage, pywikibot.PropertyPage, pywikibot.LexemePage]) -> Output:
+    def run_item(
+        self,
+        item: Union[pywikibot.ItemPage, pywikibot.PropertyPage, pywikibot.LexemePage],
+    ) -> Output:
         """The main work that should be done externally.
 
         This method will take an item and return a dictionary of list of ExtraProperties.
@@ -70,7 +80,6 @@ class PropertyAdderBot(ABC):
         """Return if the qualifier is the same."""
         return a.getTarget() == b.getTarget()
 
-
     def process(self, output: Output, item: pywikibot.ItemPage) -> bool:
         """Processes the output from run_item.
 
@@ -88,7 +97,7 @@ class PropertyAdderBot(ABC):
                     else:
                         continue
                 else:
-                    for existing_claim in item.claims[property_id]:
+                    for existing_claim in item.claims[property_id].copy():
                         existing_claim: pywikibot.Claim
                         if self.same_main_property(existing_claim, new_claim):
                             new_claim = existing_claim
@@ -96,6 +105,19 @@ class PropertyAdderBot(ABC):
                                 new_claim.rank = existing_claim.getRank()
                                 acted = True
                             break
+                        else:
+                            if extra_prop_data.replace_if_conflicting_exists:
+                                existing_claim.setTarget(new_claim.getTarget())
+                                if new_claim.getRank() != existing_claim.getRank():
+                                    new_claim.rank = existing_claim.getRank()
+                                new_claim = existing_claim
+                                if (
+                                    len(item.claims[property_id]) > 1
+                                    and extra_prop_data.delete_other_if_replacing
+                                ):
+                                    item.claims[property_id] = [new_claim]
+                                acted = True
+                                break
                     else:
                         if extra_prop_data.skip_if_conflicting_language_exists and prop in item.claims:  # type: ignore
                             for existing_claim in item.claims[prop]:  # type: ignore
@@ -134,10 +156,24 @@ class PropertyAdderBot(ABC):
                             for existing_qualifier in new_claim.qualifiers[
                                 qualifier_prop
                             ]:
-                                if self.same_qualifier(
-                                    existing_qualifier, qualifier
-                                ):
+                                if self.same_qualifier(existing_qualifier, qualifier):
                                     break
+                                else:
+                                    if qualifier_data.replace_if_conflicting_exists:
+                                        existing_qualifier.setTarget(
+                                            qualifier.getTarget()
+                                        )
+                                        qualifier = existing_qualifier
+                                        if (
+                                            len(new_claim.qualifiers[qualifier_prop])
+                                            > 1
+                                            and qualifier_data.delete_other_if_replacing
+                                        ):
+                                            new_claim.qualifiers[qualifier_prop] = [
+                                                qualifier
+                                            ]
+                                        acted = True
+                                        break
                             else:
                                 if qualifier_data.skip_if_conflicting_exists:
                                     continue
@@ -155,12 +191,16 @@ class PropertyAdderBot(ABC):
                     for existing_reference in new_claim.getSources():
                         if extra_reference.is_compatible_reference(existing_reference):
                             compatible = True
-                            if merge_reference_groups(existing_reference,
-                                                   list(extra_reference.new_reference_props.values())):
+                            if merge_reference_groups(
+                                existing_reference,
+                                list(extra_reference.new_reference_props.values()),
+                            ):
                                 acted = True
                             break
                     if not compatible:
-                        add_reference_locally(new_claim, *extra_reference.new_reference_props.values())
+                        add_reference_locally(
+                            new_claim, *extra_reference.new_reference_props.values()
+                        )
                         acted = True
         if acted:
             item.editEntity(
