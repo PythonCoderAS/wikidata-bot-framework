@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import List, MutableMapping, overload, Literal
+from typing import List, Literal, MutableMapping, overload
 
 import pywikibot
 
@@ -50,15 +50,54 @@ class OutputHelper(
     def add_property(self, prop: ExtraProperty):
         self[prop.claim.getID()].append(prop)
 
+
 @overload
-def get_sparql_query(property_val: str, *, multiple_or=True, or_return_value=False, filter_out_unknown_value: bool = True) -> dict[str, str]: ...
+def get_sparql_query(
+    property_val: str,
+    *,
+    multiple_or=True,
+    or_return_value=False,
+    filter_out_unknown_value: bool = True,
+) -> dict[str, str]:
+    ...
+
+
 @overload
-def get_sparql_query(*property_values: str, multiple_or: Literal[True]=True, or_return_value: Literal[False]=False, filter_out_unknown_value: bool = True) -> list[str]: ...
+def get_sparql_query(
+    *property_values: str,
+    multiple_or: Literal[True] = True,
+    or_return_value: Literal[False] = False,
+    filter_out_unknown_value: bool = True,
+) -> list[str]:
+    ...
+
+
 @overload
-def get_sparql_query(*property_values: str, multiple_or: Literal[True]=True, or_return_value: Literal[True]=True, filter_out_unknown_value: bool = True) -> dict[str, dict[str, str]]: ...
+def get_sparql_query(
+    *property_values: str,
+    multiple_or: Literal[True] = True,
+    or_return_value: Literal[True] = True,
+    filter_out_unknown_value: bool = True,
+) -> dict[str, dict[str, str]]:
+    ...
+
+
 @overload
-def get_sparql_query(*property_values: str, multiple_or: Literal[False]=False, or_return_value: bool=True, filter_out_unknown_value: bool = True) -> dict[str, dict[str, str]]: ...
-def get_sparql_query(*property_values: str, multiple_or=True, or_return_value=False, filter_out_unknown_value: bool = True):
+def get_sparql_query(
+    *property_values: str,
+    multiple_or: Literal[False] = False,
+    or_return_value: bool = True,
+    filter_out_unknown_value: bool = True,
+) -> dict[str, dict[str, str]]:
+    ...
+
+
+def get_sparql_query(
+    *property_values: str,
+    multiple_or=True,
+    or_return_value=False,
+    filter_out_unknown_value: bool = True,
+):
     """Get the requests of a SPARQL query.
 
     Args:
@@ -96,17 +135,33 @@ def get_sparql_query(*property_values: str, multiple_or=True, or_return_value=Fa
     r.raise_for_status()
     data = r.json()
     if not or_return_value:
-        return [item["item"]["value"].split("/")[-1] for item in data["results"]["bindings"]]
+        return [
+            item["item"]["value"].split("/")[-1] for item in data["results"]["bindings"]
+        ]
     elif len(property_values) == 1:
         return {
-            item["item"]["value"].split("/")[-1]: item[f"prop{property_values[0]}"]["value"]
+            item["item"]["value"].split("/")[-1]: item[f"prop{property_values[0]}"][
+                "value"
+            ]
             for item in data["results"]["bindings"]
         }
     else:
         retval = {
             item["item"]["value"].split("/")[-1]: {
-                prop: (item[f"prop{prop}"]["value"] if f"prop{prop}" in item else None) for prop in property_values
+                prop: (item[f"prop{prop}"]["value"] if f"prop{prop}" in item else None)
+                for prop in property_values
             }
             for item in data["results"]["bindings"]
         }
-        return dict(filter(lambda data: not any(".well-known" in str(val) for val in data[1].values()), retval.items())) if filter_out_unknown_value else retval
+        return (
+            dict(
+                filter(
+                    lambda data: not any(
+                        ".well-known" in str(val) for val in data[1].values()
+                    ),
+                    retval.items(),
+                )
+            )
+            if filter_out_unknown_value
+            else retval
+        )
