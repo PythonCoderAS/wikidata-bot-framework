@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import List, Literal, MutableMapping, overload
+from typing import Literal, MutableMapping, overload
 
 import pywikibot
 
@@ -42,7 +42,7 @@ def merge_reference_groups(
 
 
 class OutputHelper(
-    defaultdict[str, List[ExtraProperty]], MutableMapping[str, List[ExtraProperty]]
+    defaultdict[str, list[ExtraProperty]], MutableMapping[str, list[ExtraProperty]]
 ):
     def __init__(self):
         super().__init__(list)
@@ -58,7 +58,7 @@ def get_sparql_query(
     multiple_or=True,
     or_return_value=False,
     filter_out_unknown_value: bool = True,
-) -> dict[str, str]:
+) -> dict[str, set[str]]:
     ...
 
 
@@ -68,7 +68,7 @@ def get_sparql_query(
     multiple_or: Literal[True] = True,
     or_return_value: Literal[False] = False,
     filter_out_unknown_value: bool = True,
-) -> list[str]:
+) -> set[str]:
     ...
 
 
@@ -78,7 +78,7 @@ def get_sparql_query(
     multiple_or: Literal[True] = True,
     or_return_value: Literal[True] = True,
     filter_out_unknown_value: bool = True,
-) -> dict[str, dict[str, str]]:
+) -> dict[str, dict[str, set[str]]]:
     ...
 
 
@@ -88,7 +88,7 @@ def get_sparql_query(
     multiple_or: Literal[False] = False,
     or_return_value: bool = True,
     filter_out_unknown_value: bool = True,
-) -> dict[str, dict[str, str]]:
+) -> dict[str, dict[str, set[str]]]:
     ...
 
 
@@ -135,33 +135,29 @@ def get_sparql_query(
     r.raise_for_status()
     data = r.json()
     if not or_return_value:
-        return [
-            item["item"]["value"].split("/")[-1] for item in data["results"]["bindings"]
-        ]
-    elif len(property_values) == 1:
         return {
-            item["item"]["value"].split("/")[-1]: item[f"prop{property_values[0]}"][
+            item["item"]["value"].split("/")[-1] for item in data["results"]["bindings"]
+        }
+    elif len(property_values) == 1:
+        retval = defaultdict(set)
+        for item in data["results"]["bindings"]:
+            if filter_out_unknown_value and ".well-known" in str(item[f"prop{property_values[0]}"][
                 "value"
-            ]
-            for item in data["results"]["bindings"]
-        }
+            ]):
+                continue
+            retval[item["item"]["value"].split("/")[-1]].add(item[f"prop{property_values[0]}"][
+                "value"
+            ])
+        return dict(retval)
     else:
-        retval = {
-            item["item"]["value"].split("/")[-1]: {
-                prop: (item[f"prop{prop}"]["value"] if f"prop{prop}" in item else None)
-                for prop in property_values
-            }
-            for item in data["results"]["bindings"]
-        }
-        return (
-            dict(
-                filter(
-                    lambda data: not any(
-                        ".well-known" in str(val) for val in data[1].values()
-                    ),
-                    retval.items(),
-                )
-            )
-            if filter_out_unknown_value
-            else retval
-        )
+        retval = defaultdict(lambda: defaultdict(set))
+        for item in data["results"]["bindings"]:
+            for prop in property_values:
+                if filter_out_unknown_value and ".well-known" in str(item[f"prop{prop}"][
+                    "value"
+                ]):
+                    continue
+                retval[item["item"]["value"].split("/")[-1]][prop].add(item[f"prop{prop}"][
+                    "value"
+                ])
+        return dict(retval)
