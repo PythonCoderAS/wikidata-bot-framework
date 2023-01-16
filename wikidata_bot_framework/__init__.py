@@ -25,7 +25,7 @@ class PropertyAdderBot(ABC):
         pass
 
     @abstractmethod
-    def get_edit_summary(self, page: pywikibot.ItemPage) -> str:
+    def get_edit_summary(self, page: EntityPage) -> str:
         """Get the edit summary for the bot.
 
         :param page: The item page that was edited.
@@ -33,7 +33,7 @@ class PropertyAdderBot(ABC):
         """
         pass
 
-    def _get_full_summary(self, page: pywikibot.ItemPage):
+    def _get_full_summary(self, page: EntityPage):
         base = self.get_edit_summary(page)
         if edit_group_id := self.get_edit_group_id():
             return f"{base} ([[:toolforge:editgroups/b/CB/{edit_group_id}|details]])"
@@ -42,7 +42,7 @@ class PropertyAdderBot(ABC):
     @abstractmethod
     def run_item(
         self,
-        item: Union[pywikibot.ItemPage, pywikibot.PropertyPage, pywikibot.LexemePage],
+        item: EntityPage,
     ) -> Output:
         """The main work that should be done externally.
 
@@ -54,7 +54,7 @@ class PropertyAdderBot(ABC):
         """
         pass
 
-    def logger_hook(self, page: pywikibot.ItemPage) -> None:
+    def logger_hook(self, page: EntityPage) -> None:
         """A hook for logging.
 
         :param page: The item page that was edited.
@@ -66,28 +66,38 @@ class PropertyAdderBot(ABC):
         return not extra_property.reference_only
 
     def same_main_property(
-        self, existing_claim: pywikibot.Claim, new_claim: pywikibot.Claim
+        self,
+        existing_claim: pywikibot.Claim,
+        new_claim: pywikibot.Claim,
+        page: EntityPage,
     ) -> bool:
         """Return if the main property is the same.
 
         :param existing_claim: The existing claim to compare to.
         :param new_claim: The new claim to compare to.
+        :param page: The item page that is being edited.
         :return: If the main property is the same.
         """
         return existing_claim.getTarget() == new_claim.getTarget()
 
     def same_qualifier(
-        self, existing_qualifier: pywikibot.Claim, new_qualifier: pywikibot.Claim
+        self,
+        existing_qualifier: pywikibot.Claim,
+        new_qualifier: pywikibot.Claim,
+        main_claim: pywikibot.Claim,
+        page: EntityPage,
     ) -> bool:
         """Return if the qualifier is the same.
 
         :param existing_qualifier: The existing qualifier to compare to.
         :param new_qualifier: The new qualifier to compare to.
+        :param main_claim: The main claim that the qualifier is on.
+        :param page: The item page that is being edited.
         :return: If the qualifier is the same.
         """
         return existing_qualifier.getTarget() == new_qualifier.getTarget()
 
-    def process(self, output: Output, item: pywikibot.ItemPage) -> bool:
+    def process(self, output: Output, item: EntityPage) -> bool:
         """Processes the output from run_item.
 
         :param output: The output to process
@@ -106,7 +116,7 @@ class PropertyAdderBot(ABC):
                 else:
                     for existing_claim in item.claims[property_id].copy():
                         existing_claim: pywikibot.Claim
-                        if self.same_main_property(existing_claim, new_claim):
+                        if self.same_main_property(existing_claim, new_claim, item):
                             new_claim = existing_claim
                             if new_claim.getRank() != existing_claim.getRank():
                                 new_claim.rank = existing_claim.getRank()
@@ -163,7 +173,9 @@ class PropertyAdderBot(ABC):
                             for existing_qualifier in new_claim.qualifiers[
                                 qualifier_prop
                             ]:
-                                if self.same_qualifier(existing_qualifier, qualifier):
+                                if self.same_qualifier(
+                                    existing_qualifier, qualifier, new_claim, item
+                                ):
                                     break
                                 else:
                                     if qualifier_data.replace_if_conflicting_exists:
@@ -216,7 +228,7 @@ class PropertyAdderBot(ABC):
             )
         return acted
 
-    def act_on_item(self, item: pywikibot.ItemPage) -> bool:
+    def act_on_item(self, item: EntityPage) -> bool:
         """Act on an item.
 
         :param item: The item to act on.
@@ -224,7 +236,7 @@ class PropertyAdderBot(ABC):
         """
         return self.process(self.run_item(item), item)
 
-    def feed_items(self, items: Iterable[pywikibot.ItemPage]) -> None:
+    def feed_items(self, items: Iterable[EntityPage]) -> None:
         """Feed items to the bot.
 
         :param items: The items to feed.
