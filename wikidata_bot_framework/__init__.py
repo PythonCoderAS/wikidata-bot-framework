@@ -97,6 +97,32 @@ class PropertyAdderBot(ABC):
         """
         return existing_qualifier.getTarget() == new_qualifier.getTarget()
 
+    def post_output_process_hook(self, output: Output, item: EntityPage) -> bool:
+        """Do additional processing after all output has been processed.
+
+        :param output: The output that was processed.
+        :param item: The item that was edited.
+        :return: Return whether or not the item was changed. This will be used
+            to determine if an API request should be made.
+        """
+        return False
+
+    def pre_edit_process_hook(self, item: EntityPage) -> None:
+        """Do additional processing before the item is edited.
+
+        This hook only fires if an API request will be made.
+
+        :param item: The item that is about to be edited.
+        """
+
+    def post_edit_process_hook(self, item: EntityPage) -> None:
+        """Do additional processing after the item is edited.
+
+        This hook only fires if an API request was made.
+
+        :param item: The item that was edited.
+        """
+
     def process(self, output: Output, item: EntityPage) -> bool:
         """Processes the output from run_item.
 
@@ -221,11 +247,15 @@ class PropertyAdderBot(ABC):
                             new_claim, *extra_reference.new_reference_props.values()
                         )
                         acted = True
+        if self.post_output_process_hook(output, item) and not acted:
+            acted = True
         if acted:
+            self.pre_edit_process_hook(item)
             item.editEntity(
                 summary=self._get_full_summary(item),
                 bot=True,
             )
+            self.post_edit_process_hook(item)
         return acted
 
     def act_on_item(self, item: EntityPage) -> bool:
