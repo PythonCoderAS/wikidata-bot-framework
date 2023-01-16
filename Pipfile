@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 pywikibot = "*"
 mwparserfromhell = "*"
+sentry-sdk = "*"
+python-dotenv = "*"
 
 [dev-packages]
 black = "*"
