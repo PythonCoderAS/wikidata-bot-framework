@@ -107,19 +107,21 @@ class PropertyAdderBot(ABC):
         """
         return False
 
-    def pre_edit_process_hook(self, item: EntityPage) -> None:
+    def pre_edit_process_hook(self, output: Output, item: EntityPage) -> None:
         """Do additional processing before the item is edited.
 
         This hook only fires if an API request will be made.
 
-        :param item: The item that is about to be edited.
+        :param output: The output that was processed.
+        :param item: The item that was edited.
         """
 
-    def post_edit_process_hook(self, item: EntityPage) -> None:
+    def post_edit_process_hook(self, output: Output, item: EntityPage) -> None:
         """Do additional processing after the item is edited.
 
         This hook only fires if an API request was made.
 
+        :param output: The output that was processed.
         :param item: The item that was edited.
         """
 
@@ -250,12 +252,12 @@ class PropertyAdderBot(ABC):
         if self.post_output_process_hook(output, item) and not acted:
             acted = True
         if acted:
-            self.pre_edit_process_hook(item)
+            self.pre_edit_process_hook(output, item)
             item.editEntity(
                 summary=self._get_full_summary(item),
                 bot=True,
             )
-            self.post_edit_process_hook(item)
+            self.post_edit_process_hook(output, item)
         return acted
 
     def act_on_item(self, item: EntityPage) -> bool:
