@@ -30,13 +30,13 @@ def append_to_source(
 
 
 def merge_reference_groups(
-    reference_group: defaultdict[str, list[pywikibot.Claim]],
+    reference_group: MutableMapping[str, list[pywikibot.Claim]],
     new_references: list[pywikibot.Claim],
 ) -> bool:
     acted = False
     for new_reference in new_references:
         if not new_reference.getID() in reference_group:
-            reference_group[new_reference.getID()].append(new_reference)
+            reference_group.setdefault(new_reference.getID(), []).append(new_reference)
             acted = True
     return acted
 
