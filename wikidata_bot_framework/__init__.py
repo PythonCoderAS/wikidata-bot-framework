@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Iterable, List, Literal, Mapping, Union
+from typing import Iterable, List, Mapping, Union
 
 import pywikibot
 
-from .constants import site
+from .constants import *
 from .dataclasses import ExtraProperty, ExtraQualifier, ExtraReference
 from .utils import *
 
@@ -65,13 +65,27 @@ class PropertyAdderBot(ABC):
         """Return if the property can be added or edited"""
         return not extra_property.reference_only
 
-    def same_main_property(self, a: pywikibot.Claim, b: pywikibot.Claim) -> bool:
-        """Return if the main property is the same."""
-        return a.getTarget() == b.getTarget()
+    def same_main_property(
+        self, existing_claim: pywikibot.Claim, new_claim: pywikibot.Claim
+    ) -> bool:
+        """Return if the main property is the same.
 
-    def same_qualifier(self, a: pywikibot.Claim, b: pywikibot.Claim) -> bool:
-        """Return if the qualifier is the same."""
-        return a.getTarget() == b.getTarget()
+        :param existing_claim: The existing claim to compare to.
+        :param new_claim: The new claim to compare to.
+        :return: If the main property is the same.
+        """
+        return existing_claim.getTarget() == new_claim.getTarget()
+
+    def same_qualifier(
+        self, existing_qualifier: pywikibot.Claim, new_qualifier: pywikibot.Claim
+    ) -> bool:
+        """Return if the qualifier is the same.
+
+        :param existing_qualifier: The existing qualifier to compare to.
+        :param new_qualifier: The new qualifier to compare to.
+        :return: If the qualifier is the same.
+        """
+        return existing_qualifier.getTarget() == new_qualifier.getTarget()
 
     def process(self, output: Output, item: pywikibot.ItemPage) -> bool:
         """Processes the output from run_item.

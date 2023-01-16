@@ -11,6 +11,9 @@ mwparserfromhell = "*"
 black = "*"
 isort = "*"
 
+[scripts]
+make-dist = "bash -c 'rm -r dist 2>/dev/null; pyproject-build; twine upload dist/*'"
+
 [requires]
 python_version = "3.10"
 python_full_version = "3.10.9"

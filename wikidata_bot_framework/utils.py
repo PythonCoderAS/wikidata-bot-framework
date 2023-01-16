@@ -141,23 +141,23 @@ def get_sparql_query(
     elif len(property_values) == 1:
         retval = defaultdict(set)
         for item in data["results"]["bindings"]:
-            if filter_out_unknown_value and ".well-known" in str(item[f"prop{property_values[0]}"][
-                "value"
-            ]):
+            if filter_out_unknown_value and ".well-known" in str(
+                item[f"prop{property_values[0]}"]["value"]
+            ):
                 continue
-            retval[item["item"]["value"].split("/")[-1]].add(item[f"prop{property_values[0]}"][
-                "value"
-            ])
+            retval[item["item"]["value"].split("/")[-1]].add(
+                item[f"prop{property_values[0]}"]["value"]
+            )
         return dict(retval)
     else:
         retval = defaultdict(lambda: defaultdict(set))
         for item in data["results"]["bindings"]:
             for prop in property_values:
-                if filter_out_unknown_value and ".well-known" in str(item[f"prop{prop}"][
-                    "value"
-                ]):
+                if filter_out_unknown_value and ".well-known" in str(
+                    item[f"prop{prop}"]["value"]
+                ):
                     continue
-                retval[item["item"]["value"].split("/")[-1]][prop].add(item[f"prop{prop}"][
-                    "value"
-                ])
+                retval[item["item"]["value"].split("/")[-1]][prop].add(
+                    item[f"prop{prop}"]["value"]
+                )
         return dict(retval)
