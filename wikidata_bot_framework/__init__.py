@@ -253,18 +253,18 @@ class PropertyAdderBot(ABC):
                             new_claim, *extra_reference.new_reference_props.values()
                         )
                         acted = True
-        with start_span(op="post_output_process", name="Post-Output Process Hook"):
+        with start_span(op="post_output_process"):
             if self.post_output_process_hook(output, item) and not acted:
                 acted = True
         if acted:
-            with start_span(op="pre_edit_process", name="Pre-Edit Process Hook"):
+            with start_span(op="pre_edit_process"):
                 self.pre_edit_process_hook(output, item)
-            with start_span(op="edit_entity", name="Send edit to server"):
+            with start_span(op="edit_entity"):
                 item.editEntity(
                     summary=self._get_full_summary(item),
                     bot=True,
                 )
-            with start_span(op="post_edit_process", name="Post-Edit Process Hook"):
+            with start_span(op="post_edit_process"):
                 self.post_edit_process_hook(output, item)
         return acted
 
@@ -274,10 +274,10 @@ class PropertyAdderBot(ABC):
         :param item: The item to act on.
         :return: If any edits were made to the item.
         """
-        with start_transaction(op="act_on_item", name="Process Item"):
-            with start_span(op="get_output", name="Get Output"):
+        with start_transaction(op="act_on_item"):
+            with start_span(op="get_output"):
                 output = self.run_item(item)
-            with start_span(op="process_output", name="Process Output"):
+            with start_span(op="process_output"):
                 return self.process(output, item)
 
     def feed_items(self, items: Iterable[EntityPage]) -> None:
