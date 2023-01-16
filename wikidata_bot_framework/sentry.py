@@ -1,4 +1,4 @@
-import sentry_sdk
+import sentry_sdk.tracing
 from contextlib import contextmanager
 from dotenv import dotenv_values
 from typing import Iterator, Union
@@ -15,7 +15,9 @@ def load_sentry():
 
 
 @contextmanager
-def start_transaction(**kwargs) -> Iterator[Union[sentry_sdk.Transaction, None]]:
+def start_transaction(
+    **kwargs,
+) -> Iterator[Union[sentry_sdk.tracing.Transaction, None]]:
     if sentry_avilable:
         with sentry_sdk.start_transaction(**kwargs) as transaction:
             yield transaction
@@ -24,7 +26,7 @@ def start_transaction(**kwargs) -> Iterator[Union[sentry_sdk.Transaction, None]]
 
 
 @contextmanager
-def start_span(**kwargs) -> Iterator[Union[sentry_sdk.Span, None]]:
+def start_span(**kwargs) -> Iterator[Union[sentry_sdk.tracing.Span, None]]:
     if sentry_avilable:
         span = sentry_sdk.Hub.current.scope.span
         if span is None:
