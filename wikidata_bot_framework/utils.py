@@ -1,4 +1,5 @@
 from collections import defaultdict
+import secrets
 from typing import Literal, MutableMapping, overload
 
 import pywikibot
@@ -161,3 +162,12 @@ def get_sparql_query(
                     item[f"prop{prop}"]["value"]
                 )
         return dict(retval)
+
+
+def get_random_hex(num_chars: int = 32):
+    """Generate a random hex suitable for EditGrouos.
+
+    :param num_chars: The number of hexadecimal digits wanted, defaults to 32
+    :return: A random hex string.
+    """
+    return secrets.token_hex(num_chars // 2)
