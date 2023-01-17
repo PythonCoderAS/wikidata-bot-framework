@@ -149,10 +149,10 @@ class PropertyAdderBot(ABC):
                     for existing_claim in item.claims[property_id].copy():
                         existing_claim: pywikibot.Claim
                         if self.same_main_property(existing_claim, new_claim, item):
-                            new_claim = existing_claim
                             if new_claim.getRank() != existing_claim.getRank():
                                 new_claim.rank = existing_claim.getRank()
                                 acted = True
+                            new_claim = existing_claim
                             break
                         else:
                             if extra_prop_data.replace_if_conflicting_exists:
