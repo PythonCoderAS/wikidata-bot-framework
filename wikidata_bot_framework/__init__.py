@@ -58,10 +58,11 @@ class PropertyAdderBot(ABC):
         """
         pass
 
-    def logger_hook(self, page: EntityPage) -> None:
+    def logger_hook(self, output: Output, item: EntityPage) -> None:
         """A hook for logging.
 
-        :param page: The item page that was edited.
+        :param output: The output that was processed.
+        :param item: The item that was edited.
         """
         pass
 
@@ -117,7 +118,7 @@ class PropertyAdderBot(ABC):
         This hook only fires if an API request will be made.
 
         :param output: The output that was processed.
-        :param item: The item that was edited.
+        :param item: The item that will be edited.
         """
 
     def post_edit_process_hook(self, output: Output, item: EntityPage) -> None:
@@ -133,6 +134,7 @@ class PropertyAdderBot(ABC):
         """Processes the output from run_item.
 
         :param output: The output to process
+        :param item: The item to process
         :return: If any edits were made to the item.
         """
         acted = False
@@ -150,7 +152,7 @@ class PropertyAdderBot(ABC):
                         existing_claim: pywikibot.Claim
                         if self.same_main_property(existing_claim, new_claim, item):
                             if new_claim.getRank() != existing_claim.getRank():
-                                new_claim.rank = existing_claim.getRank()
+                                existing_claim.rank = new_claim.getRank()
                                 acted = True
                             new_claim = existing_claim
                             break
@@ -270,6 +272,8 @@ class PropertyAdderBot(ABC):
                 op="post_edit_process", description="Post Edit Process Hook"
             ):
                 self.post_edit_process_hook(output, item)
+            with start_span(op="logger_hook", description="Log Edit"):
+                self.logger_hook(output, item)
         return acted
 
     def act_on_item(self, item: EntityPage) -> bool:
