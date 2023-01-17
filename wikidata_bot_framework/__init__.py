@@ -253,18 +253,22 @@ class PropertyAdderBot(ABC):
                             new_claim, *extra_reference.new_reference_props.values()
                         )
                         acted = True
-        with start_span(op="post_output_process", name="Post Output Process Hook"):
+        with start_span(
+            op="post_output_process", description="Post Output Process Hook"
+        ):
             if self.post_output_process_hook(output, item) and not acted:
                 acted = True
         if acted:
-            with start_span(op="pre_edit_process", name="Pre Edit Process Hook"):
+            with start_span(op="pre_edit_process", description="Pre Edit Process Hook"):
                 self.pre_edit_process_hook(output, item)
-            with start_span(op="edit_entity", name="Edit Entity"):
+            with start_span(op="edit_entity", description="Edit Entity"):
                 item.editEntity(
                     summary=self._get_full_summary(item),
                     bot=True,
                 )
-            with start_span(op="post_edit_process", name="Post Edit Process Hook"):
+            with start_span(
+                op="post_edit_process", description="Post Edit Process Hook"
+            ):
                 self.post_edit_process_hook(output, item)
         return acted
 
