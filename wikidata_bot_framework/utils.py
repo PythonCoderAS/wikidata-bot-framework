@@ -1,5 +1,5 @@
-from collections import defaultdict
 import secrets
+from collections import defaultdict
 from typing import Literal, MutableMapping, overload
 
 import pywikibot

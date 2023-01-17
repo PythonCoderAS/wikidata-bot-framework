@@ -1,7 +1,9 @@
-import sentry_sdk.tracing
 from contextlib import contextmanager
-from dotenv import dotenv_values
 from typing import Iterator, Union
+
+import sentry_sdk
+import sentry_sdk.tracing
+from dotenv import dotenv_values
 
 sentry_avilable = False
 

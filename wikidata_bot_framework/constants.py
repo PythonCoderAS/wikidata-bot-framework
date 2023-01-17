@@ -1,4 +1,5 @@
 from typing import Union
+
 import pywikibot
 from requests import Session
 
