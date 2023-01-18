@@ -58,14 +58,6 @@ class PropertyAdderBot(ABC):
         """
         pass
 
-    def logger_hook(self, output: Output, item: EntityPage) -> None:
-        """A hook for logging.
-
-        :param output: The output that was processed.
-        :param item: The item that was edited.
-        """
-        pass
-
     def can_add_main_property(self, extra_property: ExtraProperty) -> bool:
         """Return if the property can be added or edited"""
         return not extra_property.reference_only
@@ -272,8 +264,6 @@ class PropertyAdderBot(ABC):
                 op="post_edit_process", description="Post Edit Process Hook"
             ):
                 self.post_edit_process_hook(output, item)
-            with start_span(op="logger_hook", description="Log Edit"):
-                self.logger_hook(output, item)
         return acted
 
     def act_on_item(self, item: EntityPage) -> bool:
