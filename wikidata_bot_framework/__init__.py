@@ -272,10 +272,21 @@ class PropertyAdderBot(ABC):
             with start_span(op="pre_edit_process", description="Pre Edit Process Hook"):
                 self.pre_edit_process_hook(output, item)
             with start_span(op="edit_entity", description="Edit Entity"):
-                item.editEntity(
-                    summary=self._get_full_summary(item),
-                    bot=True,
-                )
+                retries = 3
+                while retries >= 0:
+                    with start_span(
+                        op="edit_entity_try", description="Edit Entity Attempt"
+                    ):
+                        try:
+                            item.editEntity(
+                                summary=self._get_full_summary(item),
+                                bot=True,
+                            )
+                            break
+                        except pywikibot.exceptions.APIError as e:
+                            retries -= 1
+                            if retries < 0:
+                                raise e
             with start_span(
                 op="post_edit_process", description="Post Edit Process Hook"
             ):

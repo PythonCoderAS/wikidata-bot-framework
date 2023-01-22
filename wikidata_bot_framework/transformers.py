@@ -1,13 +1,14 @@
-import pywikibot
-import re
 import datetime
+import re
+
+import pywikibot
 
 from .constants import (
-    site,
-    archive_url_prop,
     archive_date_prop,
+    archive_url_prop,
     deprecated_reason_prop,
     link_rot_id,
+    site,
 )
 from .dataclasses import ExtraProperty, ExtraQualifier
 
