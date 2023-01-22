@@ -39,3 +39,8 @@ def start_span(**kwargs) -> Iterator[Union[sentry_sdk.tracing.Span, None]]:
                 yield span
     else:
         yield None
+
+
+def report_exception(*args, **kwargs) -> Union[str, None]:
+    if sentry_avilable:
+        return sentry_sdk.capture_exception(*args, **kwargs)
