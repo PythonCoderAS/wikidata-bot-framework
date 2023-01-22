@@ -1,14 +1,22 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from typing import Iterable, List, Mapping, Union
 
 import pywikibot
 
 from .constants import *
-from .dataclasses import ExtraProperty, ExtraQualifier, ExtraReference
+from .dataclasses import *
 from .sentry import *
+from .transformers import *
 from .utils import *
 
 Output = Mapping[str, List[ExtraProperty]]
+
+
+@dataclass(frozen=True, kw_only=True)
+class Config:
+    auto_dearchivify_urls: bool = True
+    auto_deprecate_archified_urls: bool = True
 
 
 class PropertyAdderBot(ABC):
@@ -19,6 +27,10 @@ class PropertyAdderBot(ABC):
 
     def __init__(self):
         load_sentry()
+        self.config = Config()
+
+    def set_config(self, config: Config):
+        self.config = config
 
     @abstractmethod
     def get_edit_group_id(self) -> Union[str, None]:
@@ -133,6 +145,10 @@ class PropertyAdderBot(ABC):
         for property_id, extra_props in output.items():
             for extra_prop_data in extra_props:
                 new_claim = original_claim = extra_prop_data.claim
+                if new_claim.type == "url" and self.config.auto_dearchivify_urls:
+                    de_archivify_url_property(
+                        new_claim, deprecate=self.config.auto_deprecate_archified_urls
+                    )
                 if property_id not in item.claims:
                     if self.can_add_main_property(extra_prop_data):
                         add_claim_locally(item, new_claim)
