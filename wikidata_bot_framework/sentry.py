@@ -12,7 +12,9 @@ def load_sentry():
     global sentry_avilable
     data = dotenv_values(".env")
     if data.get("SENTRY_DSN", None):
-        sentry_sdk.init(data["SENTRY_DSN"], traces_sample_rate=1.0)
+        sentry_sdk.init(data["SENTRY_DSN"], traces_sample_rate=1.0,   _experiments={
+    "profiles_sample_rate": 1.0,
+  })
         sentry_avilable = True
 
 
