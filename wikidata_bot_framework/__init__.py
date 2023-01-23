@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Iterable, List, Mapping, Union
 
 import pywikibot
@@ -16,7 +16,27 @@ Output = Mapping[str, List[ExtraProperty]]
 @dataclass(frozen=True, kw_only=True)
 class Config:
     auto_dearchivify_urls: bool = True
+    """Automatically get rid of archive.org URLs and turn them into the original URL along with necessary qualifiers"""
     auto_deprecate_archified_urls: bool = True
+    """Mark dearchivified URLs as deprecated"""
+    create_or_edit_main_propertywhitelist_enabled: bool = False
+    """Enable the whitelist for creating or editing main properties"""
+    create_or_edit_main_propertywhitelist: List[str] = field(default_factory=list)
+    """The whitelist for creating or editing main properties"""
+    copy_ranks_for_nonwhitelisted_main_properties: bool = True
+    """Copy the rank of non-whitelisted main properties (requires create_or_edit_main_propertywhitelist_enabled)"""
+    create_or_edit_qualifiers_for_main_propertywhitelist_enabled: bool = False
+    """Enable the whitelist for creating or editing qualifiers when the main property is blacklisted (requires create_or_edit_main_propertywhitelist_enabled)"""
+    create_or_edit_qualifiers_for_main_propertywhitelist: List[str] = field(
+        default_factory=list
+    )
+    """The whitelist for creating or editing qualifiers when the main property is blacklisted (requires create_or_edit_main_propertywhitelist_enabled)"""
+    create_or_edit_references_for_main_propertywhitelist_enabled: bool = False
+    """Enable the whitelist for creating or editing references when the main property is blacklisted (requires create_or_edit_main_propertywhitelist_enabled)"""
+    create_or_edit_references_for_main_propertywhitelist: List[str] = field(
+        default_factory=list
+    )
+    """The whitelist for creating or editing references when the main property is blacklisted (requires create_or_edit_main_propertywhitelist_enabled)"""
 
 
 class PropertyAdderBot(ABC):
@@ -134,6 +154,54 @@ class PropertyAdderBot(ABC):
         :param item: The item that was edited.
         """
 
+    def whitelisted_claim(self, prop: ExtraProperty) -> bool:
+        """Return if the claim is whitelisted.
+
+        :param prop: The property to check.
+        :return: If the claim is whitelisted.
+        """
+        if self.config.create_or_edit_main_propertywhitelist_enabled:
+            if prop.claim.getID() in self.config.create_or_edit_main_propertywhitelist:
+                return True
+            return False
+        return True
+
+    def whitelisted_qualifier(
+        self, prop: ExtraProperty, qualifier: ExtraQualifier
+    ) -> bool:
+        """Return if the qualifier is whitelisted.
+
+        :param prop: The property to check.
+        :param qualifier: The qualifier to check.
+        :return: If the qualifier is whitelisted.
+        """
+        if self.config.create_or_edit_qualifiers_for_main_propertywhitelist_enabled:
+            if (
+                qualifier.claim.getID()
+                in self.config.create_or_edit_qualifiers_for_main_propertywhitelist
+            ):
+                return True
+            return False
+        return True
+
+    def whitelisted_reference(
+        self, prop: ExtraProperty, reference: ExtraReference
+    ) -> bool:
+        """Return if the reference is whitelisted.
+
+        :param prop: The property to check.
+        :param reference: The reference to check.
+        :return: If the reference is whitelisted.
+        """
+        if self.config.create_or_edit_references_for_main_propertywhitelist_enabled:
+            if (
+                reference.claim.getID()
+                in self.config.create_or_edit_references_for_main_propertywhitelist
+            ):
+                return True
+            return False
+        return True
+
     def process(self, output: Output, item: EntityPage) -> bool:
         """Processes the output from run_item.
 
@@ -150,7 +218,9 @@ class PropertyAdderBot(ABC):
                         new_claim, deprecate=self.config.auto_deprecate_archified_urls
                     )
                 if property_id not in item.claims:
-                    if self.can_add_main_property(extra_prop_data):
+                    if self.can_add_main_property(
+                        extra_prop_data
+                    ) and self.whitelisted_claim(extra_prop_data):
                         add_claim_locally(item, new_claim)
                         acted = True
                     else:
@@ -158,18 +228,26 @@ class PropertyAdderBot(ABC):
                 else:
                     for existing_claim in item.claims[property_id].copy():
                         existing_claim: pywikibot.Claim
-                        if self.same_main_property(existing_claim, new_claim, item):
+                        if self.same_main_property(
+                            existing_claim, new_claim, item
+                        ) and (
+                            self.whitelisted_claim(extra_prop_data)
+                            or self.config.copy_ranks_for_nonwhitelisted_main_properties
+                        ):
                             if new_claim.getRank() != existing_claim.getRank():
                                 existing_claim.rank = new_claim.getRank()
                                 acted = True
-                            new_claim = existing_claim
+                            new_claim = extra_prop_data.claim = existing_claim
                             break
                         else:
-                            if extra_prop_data.replace_if_conflicting_exists:
+                            if (
+                                extra_prop_data.replace_if_conflicting_exists
+                                and self.whitelisted_claim(extra_prop_data)
+                            ):
                                 existing_claim.setTarget(new_claim.getTarget())
                                 if new_claim.getRank() != existing_claim.getRank():
                                     new_claim.rank = existing_claim.getRank()
-                                new_claim = existing_claim
+                                new_claim = extra_prop_data.claim = existing_claim
                                 if (
                                     len(item.claims[property_id]) > 1
                                     and extra_prop_data.delete_other_if_replacing
@@ -191,14 +269,18 @@ class PropertyAdderBot(ABC):
                                 else:
                                     continue
                             else:
-                                if self.can_add_main_property(extra_prop_data):
+                                if self.can_add_main_property(
+                                    extra_prop_data
+                                ) and self.whitelisted_claim(extra_prop_data):
                                     add_claim_locally(item, new_claim)
                                     acted = True
                                 else:
                                     continue
                         elif extra_prop_data.skip_if_conflicting_exists:
                             continue
-                        if self.can_add_main_property(extra_prop_data):
+                        if self.can_add_main_property(
+                            extra_prop_data
+                        ) and self.whitelisted_claim(extra_prop_data):
                             add_claim_locally(item, new_claim)
                             acted = True
                         else:
@@ -208,6 +290,9 @@ class PropertyAdderBot(ABC):
                         qualifier = qualifier_data.claim
                         if qualifier not in new_claim.qualifiers.get(
                             qualifier_prop, []
+                        ) and (
+                            self.whitelisted_claim(extra_prop_data)
+                            or self.whitelisted_qualifier(extra_prop_data, qualifier)
                         ):
                             add_qualifier_locally(new_claim, qualifier)
                             acted = True
@@ -220,7 +305,15 @@ class PropertyAdderBot(ABC):
                                 ):
                                     break
                                 else:
-                                    if qualifier_data.replace_if_conflicting_exists:
+                                    if (
+                                        qualifier_data.replace_if_conflicting_exists
+                                        and (
+                                            self.whitelisted_claim(extra_prop_data)
+                                            or self.whitelisted_qualifier(
+                                                extra_prop_data, qualifier
+                                            )
+                                        )
+                                    ):
                                         existing_qualifier.setTarget(
                                             qualifier.getTarget()
                                         )
@@ -238,9 +331,14 @@ class PropertyAdderBot(ABC):
                             else:
                                 if qualifier_data.skip_if_conflicting_exists:
                                     continue
-                                elif qualifier_data.make_new_if_conflicting:
+                                elif (
+                                    qualifier_data.make_new_if_conflicting
+                                    and self.whitelisted_claim(extra_prop_data)
+                                ):
                                     if self.can_add_main_property(extra_prop_data):
-                                        new_claim = original_claim
+                                        new_claim = (
+                                            extra_prop_data.claim
+                                        ) = original_claim
                                         add_claim_locally(item, new_claim)
                                         acted = True
                                     else:
@@ -250,7 +348,14 @@ class PropertyAdderBot(ABC):
                 for extra_reference in extra_prop_data.extra_references:
                     compatible = False
                     for existing_reference in new_claim.getSources():
-                        if extra_reference.is_compatible_reference(existing_reference):
+                        if extra_reference.is_compatible_reference(
+                            existing_reference
+                        ) and (
+                            self.whitelisted_claim(extra_prop_data)
+                            or self.whitelisted_reference(
+                                extra_prop_data, extra_reference
+                            )
+                        ):
                             compatible = True
                             if merge_reference_groups(
                                 existing_reference,
@@ -258,7 +363,10 @@ class PropertyAdderBot(ABC):
                             ):
                                 acted = True
                             break
-                    if not compatible:
+                    if not compatible and (
+                        self.whitelisted_claim(extra_prop_data)
+                        or self.whitelisted_reference(extra_prop_data, extra_reference)
+                    ):
                         add_reference_locally(
                             new_claim, *extra_reference.new_reference_props.values()
                         )
