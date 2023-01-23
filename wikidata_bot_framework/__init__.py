@@ -215,7 +215,8 @@ class PropertyAdderBot(ABC):
                 new_claim = original_claim = extra_prop_data.claim
                 if new_claim.type == "url" and self.config.auto_dearchivify_urls:
                     de_archivify_url_property(
-                        new_claim, deprecate=self.config.auto_deprecate_archified_urls
+                        extra_prop_data,
+                        deprecate=self.config.auto_deprecate_archified_urls,
                     )
                 if property_id not in item.claims:
                     if self.can_add_main_property(
