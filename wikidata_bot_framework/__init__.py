@@ -229,15 +229,14 @@ class PropertyAdderBot(ABC):
                 else:
                     for existing_claim in item.claims[property_id].copy():
                         existing_claim: pywikibot.Claim
-                        if self.same_main_property(
-                            existing_claim, new_claim, item
-                        ) and (
-                            self.whitelisted_claim(extra_prop_data)
-                            or self.config.copy_ranks_for_nonwhitelisted_main_properties
-                        ):
+                        if self.same_main_property(existing_claim, new_claim, item):
                             if new_claim.getRank() != existing_claim.getRank():
-                                existing_claim.rank = new_claim.getRank()
-                                acted = True
+                                if (
+                                    self.whitelisted_claim(extra_prop_data)
+                                    or self.config.copy_ranks_for_nonwhitelisted_main_properties
+                                ):
+                                    existing_claim.rank = new_claim.getRank()
+                                    acted = True
                             new_claim = extra_prop_data.claim = existing_claim
                             break
                         else:
