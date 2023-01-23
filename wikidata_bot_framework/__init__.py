@@ -19,24 +19,24 @@ class Config:
     """Automatically get rid of archive.org URLs and turn them into the original URL along with necessary qualifiers"""
     auto_deprecate_archified_urls: bool = True
     """Mark dearchivified URLs as deprecated"""
-    create_or_edit_main_propertywhitelist_enabled: bool = False
+    create_or_edit_main_property_whitelist_enabled: bool = False
     """Enable the whitelist for creating or editing main properties"""
-    create_or_edit_main_propertywhitelist: List[str] = field(default_factory=list)
+    create_or_edit_main_property_whitelist: List[str] = field(default_factory=list)
     """The whitelist for creating or editing main properties"""
     copy_ranks_for_nonwhitelisted_main_properties: bool = True
-    """Copy the rank of non-whitelisted main properties (requires create_or_edit_main_propertywhitelist_enabled)"""
-    create_or_edit_qualifiers_for_main_propertywhitelist_enabled: bool = False
-    """Enable the whitelist for creating or editing qualifiers when the main property is blacklisted (requires create_or_edit_main_propertywhitelist_enabled)"""
-    create_or_edit_qualifiers_for_main_propertywhitelist: List[str] = field(
+    """Copy the rank of non-whitelisted main properties (requires create_or_edit_main_property_whitelist_enabled)"""
+    create_or_edit_qualifiers_for_main_property_whitelist_enabled: bool = False
+    """Enable the whitelist for creating or editing qualifiers when the main property is blacklisted (requires create_or_edit_main_property_whitelist_enabled)"""
+    create_or_edit_qualifiers_for_main_property_whitelist: List[str] = field(
         default_factory=list
     )
-    """The whitelist for creating or editing qualifiers when the main property is blacklisted (requires create_or_edit_main_propertywhitelist_enabled)"""
-    create_or_edit_references_for_main_propertywhitelist_enabled: bool = False
-    """Enable the whitelist for creating or editing references when the main property is blacklisted (requires create_or_edit_main_propertywhitelist_enabled)"""
-    create_or_edit_references_for_main_propertywhitelist: List[str] = field(
+    """The whitelist for creating or editing qualifiers when the main property is blacklisted (requires create_or_edit_main_property_whitelist_enabled)"""
+    create_or_edit_references_for_main_property_whitelist_enabled: bool = False
+    """Enable the whitelist for creating or editing references when the main property is blacklisted (requires create_or_edit_main_property_whitelist_enabled)"""
+    create_or_edit_references_for_main_property_whitelist: List[str] = field(
         default_factory=list
     )
-    """The whitelist for creating or editing references when the main property is blacklisted (requires create_or_edit_main_propertywhitelist_enabled)"""
+    """The whitelist for creating or editing references when the main property is blacklisted (requires create_or_edit_main_property_whitelist_enabled)"""
 
 
 class PropertyAdderBot(ABC):
@@ -160,8 +160,8 @@ class PropertyAdderBot(ABC):
         :param prop: The property to check.
         :return: If the claim is whitelisted.
         """
-        if self.config.create_or_edit_main_propertywhitelist_enabled:
-            if prop.claim.getID() in self.config.create_or_edit_main_propertywhitelist:
+        if self.config.create_or_edit_main_property_whitelist_enabled:
+            if prop.claim.getID() in self.config.create_or_edit_main_property_whitelist:
                 return True
             return False
         return True
@@ -175,10 +175,10 @@ class PropertyAdderBot(ABC):
         :param qualifier: The qualifier to check.
         :return: If the qualifier is whitelisted.
         """
-        if self.config.create_or_edit_qualifiers_for_main_propertywhitelist_enabled:
+        if self.config.create_or_edit_qualifiers_for_main_property_whitelist_enabled:
             if (
                 qualifier.claim.getID()
-                in self.config.create_or_edit_qualifiers_for_main_propertywhitelist
+                in self.config.create_or_edit_qualifiers_for_main_property_whitelist
             ):
                 return True
             return False
@@ -193,10 +193,10 @@ class PropertyAdderBot(ABC):
         :param reference: The reference to check.
         :return: If the reference is whitelisted.
         """
-        if self.config.create_or_edit_references_for_main_propertywhitelist_enabled:
+        if self.config.create_or_edit_references_for_main_property_whitelist_enabled:
             if (
                 reference.claim.getID()
-                in self.config.create_or_edit_references_for_main_propertywhitelist
+                in self.config.create_or_edit_references_for_main_property_whitelist
             ):
                 return True
             return False
