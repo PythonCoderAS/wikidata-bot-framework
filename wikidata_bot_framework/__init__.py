@@ -256,8 +256,8 @@ class PropertyAdderBot(ABC):
                                 acted = True
                                 break
                     else:
-                        if extra_prop_data.skip_if_conflicting_language_exists and prop in item.claims:  # type: ignore
-                            for existing_claim in item.claims[prop]:  # type: ignore
+                        if extra_prop_data.skip_if_conflicting_language_exists and property_id in item.claims:  # type: ignore
+                            for existing_claim in item.claims[property_id]:  # type: ignore
                                 existing_claim: pywikibot.Claim
                                 if isinstance(
                                     existing_claim.getTarget(),
