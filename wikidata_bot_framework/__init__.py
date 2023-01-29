@@ -13,7 +13,7 @@ from .utils import *
 Output = Mapping[str, List[ExtraProperty]]
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True)
 class Config:
     auto_dearchivify_urls: bool = True
     """Automatically get rid of archive.org URLs and turn them into the original URL along with necessary qualifiers"""
