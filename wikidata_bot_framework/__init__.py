@@ -413,10 +413,19 @@ class PropertyAdderBot(ABC):
             with start_span(op="process_output", description="Process Output"):
                 return self.process(output, item)
 
-    def feed_items(self, items: Iterable[EntityPage]) -> None:
+    def feed_items(
+        self, items: Iterable[EntityPage], skip_errored_items: bool = False
+    ) -> None:
         """Feed items to the bot.
 
         :param items: The items to feed.
+        :param skip_errored_items: If the bot should skip items that errored.
         """
         for item in items:
-            self.act_on_item(item)
+            try:
+                self.act_on_item(item)
+            except Exception as e:
+                if skip_errored_items:
+                    report_exception(e)
+                else:
+                    raise e
