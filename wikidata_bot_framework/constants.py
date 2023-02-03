@@ -2,8 +2,17 @@ from typing import Union
 
 import pywikibot
 from requests import Session
+from requests.adapters import HTTPAdapter, Retry
 
 session = Session()
+_retry = Retry(
+    total=5,
+    backoff_factor=2,
+    status_forcelist=[429, 500, 502, 503, 504],
+    respect_retry_after_header=True,
+)
+session.mount("https://", HTTPAdapter(max_retries=_retry))
+session.mount("http://", HTTPAdapter(max_retries=_retry))
 
 url_prop = "P854"
 retrieved_prop = "P813"
