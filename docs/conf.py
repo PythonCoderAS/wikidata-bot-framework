@@ -17,7 +17,13 @@ author = "PythonCoderAS"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.intersphinx", "sphinx_rtd_theme"]
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.githubpages",
+    "sphinx.ext.viewcode",
+    "sphinx_rtd_theme",
+]
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
