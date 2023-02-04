@@ -101,10 +101,10 @@ def get_sparql_query(
 ):
     """Get the requests of a SPARQL query.
 
-    Args:
-        multiple_mode (bool, optional): When specifying multiple values, whether to check for any one of them or all of them. Defaults to True.
-        or_return_value (bool, optional): When multiple_or is True, return the values. Defaults to False.
-        filter_out_unknown_value (bool, optional): Whether to filter out unknown/no values. Defaults to True.
+    :param property_values: The properties to query.
+    :param multiple_or: When specifying multiple values, whether to check for any one of them or all of them. Defaults to True.
+    :param or_return_value: When multiple_or is True, return the values. Defaults to False.
+    :param filter_out_unknown_value: Whether to filter out unknown/no values. Defaults to True.
     """
     if len(property_values) == 0:
         raise ValueError("No property values specified.")

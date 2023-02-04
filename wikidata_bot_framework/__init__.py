@@ -87,7 +87,7 @@ class PropertyAdderBot(ABC):
         The keys are the property IDs.
 
         :param item: The item to work on.
-        :return: A dictionary of list of ExtraProperties.
+        :return: A dictionary of list of ExtraProperties. Recommended to use :class:`.OutputHelper`.
         """
         pass
 
@@ -213,7 +213,7 @@ class PropertyAdderBot(ABC):
         qualifier: None = None,
         reference: None = None,
         context: None = None,
-    ):
+    ) -> bool:
         ...
 
     @overload
@@ -226,7 +226,7 @@ class PropertyAdderBot(ABC):
         qualifier: None = None,
         reference: None = None,
         context: DifferentRankContext,
-    ):
+    ) -> bool:
         ...
 
     @overload
@@ -239,7 +239,7 @@ class PropertyAdderBot(ABC):
         qualifier: None = None,
         reference: None = None,
         context: ReplaceValueContext,
-    ):
+    ) -> bool:
         ...
 
     @overload
@@ -252,7 +252,7 @@ class PropertyAdderBot(ABC):
         qualifier: None = None,
         reference: None = None,
         context: DeleteValuesContext,
-    ):
+    ) -> bool:
         ...
 
     @overload
@@ -281,7 +281,7 @@ class PropertyAdderBot(ABC):
         qualifier: ExtraQualifier,
         reference: None = None,
         context: ReplaceQualifierValueContext,
-    ):
+    ) -> bool:
         ...
 
     @overload
@@ -294,7 +294,7 @@ class PropertyAdderBot(ABC):
         qualifier: ExtraQualifier,
         reference: None = None,
         context: DeleteQualifierValuesContext,
-    ):
+    ) -> bool:
         ...
 
     @overload
@@ -307,7 +307,7 @@ class PropertyAdderBot(ABC):
         qualifier: ExtraQualifier,
         reference: None = None,
         context: NewClaimFromQualifierContext,
-    ):
+    ) -> bool:
         ...
 
     @overload
@@ -320,7 +320,7 @@ class PropertyAdderBot(ABC):
         qualifier: None = None,
         reference: ExtraReference,
         context: None = None,
-    ):
+    ) -> bool:
         ...
 
     @overload
@@ -333,7 +333,7 @@ class PropertyAdderBot(ABC):
         qualifier: None = None,
         reference: ExtraReference,
         context: MergedReferenceContext,
-    ):
+    ) -> bool:
         ...
 
     @overload
@@ -346,7 +346,7 @@ class PropertyAdderBot(ABC):
         qualifier: None = None,
         reference: None = None,
         context: None = None,
-    ):
+    ) -> bool:
         ...
 
     def processed_hook(
@@ -358,7 +358,7 @@ class PropertyAdderBot(ABC):
         qualifier: Optional[ExtraQualifier] = None,
         reference: Optional[ExtraReference] = None,
         context: Optional[dict[str, Any]] = None,
-    ):
+    ) -> bool:
         """Do processing whenever the item is modified. This method is called directly after the item is modified.
 
         :param item: The item that was modified.
@@ -367,8 +367,21 @@ class PropertyAdderBot(ABC):
         :param qualifier: The qualifier that was modified, defaults to None
         :param reference: The reference that was modified, defaults to None
         :param context: Additional context with the operation, defaults to None
+        :return: If the item was modified. This will cause a re-cycle of the process loop so only use this if something on the same tier or higher was modified.
+
+            +--------------------+-----------------------+-----------------------+-----------------------+
+            | Thing being added  | Thing being modified                                                  |
+            +                    +-----------------------+-----------------------+-----------------------+
+            |                    | Main statement        | Qualifier             | Reference             |
+            +====================+=======================+=======================+=======================+
+            | Main statement     | Yes                   | Yes                   | Yes                   |
+            +--------------------+-----------------------+-----------------------+-----------------------+
+            | Qualifier          | No                    | Yes                   | Yes                   |
+            +--------------------+-----------------------+-----------------------+-----------------------+
+            | Reference          | No                    | No                    | Yes                   |
+            +--------------------+-----------------------+-----------------------+-----------------------+
         """
-        pass
+        return False
 
     def process(self, output: Output, item: EntityPage) -> bool:
         """Processes the output from run_item.
@@ -378,303 +391,321 @@ class PropertyAdderBot(ABC):
         :return: If any edits were made to the item.
         """
         acted = False
-        for property_id, extra_props in output.items():
-            for extra_prop_data in extra_props:
-                new_claim = original_claim = extra_prop_data.claim
-                if new_claim.type == "url" and self.config.auto_dearchivify_urls:
-                    de_archivify_url_property(
-                        extra_prop_data,
-                        deprecate=self.config.auto_deprecate_archified_urls,
-                    )
-                if property_id not in item.claims:
-                    if self.can_add_main_property(
-                        extra_prop_data
-                    ) and self.whitelisted_claim(extra_prop_data):
-                        # This is triggered if there are no statements for the property
-                        add_claim_locally(item, new_claim)
-                        self.processed_hook(
-                            item, ProcessReason.missing_property, claim=extra_prop_data
+        re_cycle = True
+        while re_cycle:
+            re_cycle = False
+            for property_id, extra_props in output.items():
+                for extra_prop_data in extra_props:
+                    new_claim = original_claim = extra_prop_data.claim
+                    if new_claim.type == "url" and self.config.auto_dearchivify_urls:
+                        de_archivify_url_property(
+                            extra_prop_data,
+                            deprecate=self.config.auto_deprecate_archified_urls,
                         )
-                        acted = True
-                    else:
-                        continue
-                else:
-                    for existing_claim in item.claims[property_id].copy():
-                        existing_claim: pywikibot.Claim
-                        if self.same_main_property(existing_claim, new_claim, item):
-                            # This is triggered if there is a statement for the property exactly matching the one we want to add
-                            if new_claim.getRank() != existing_claim.getRank():
-                                if (
-                                    self.whitelisted_claim(extra_prop_data)
-                                    or self.config.copy_ranks_for_nonwhitelisted_main_properties
-                                ):
-                                    old_rank = existing_claim.getRank()
-                                    existing_claim.rank = new_claim.getRank()
-                                    self.processed_hook(
-                                        item,
-                                        ProcessReason.different_rank,
-                                        claim=extra_prop_data,
-                                        context=DifferentRankContext(
-                                            existing_claim=existing_claim,
-                                            old_rank=old_rank,
-                                        ),
-                                    )
-                                    acted = True
-                            new_claim = extra_prop_data.claim = existing_claim
-                            break
-                        else:
-                            if (
-                                extra_prop_data.replace_if_conflicting_exists
-                                and self.whitelisted_claim(extra_prop_data)
-                            ):
-                                # This is triggered if `extra_prop_data.replace_if_conflicting_exists` is set to True
-                                # and this is the first statement with the property that is not exactly matching the one we want to add
-                                old_value = existing_claim.getTarget()
-                                existing_claim.setTarget(new_claim.getTarget())
-                                if new_claim.getRank() != existing_claim.getRank():
-                                    existing_claim.rank = new_claim.getRank()
-                                    self.processed_hook(
-                                        item,
-                                        ProcessReason.different_rank,
-                                        claim=extra_prop_data,
-                                        context=DifferentRankContext(
-                                            existing_claim=existing_claim,
-                                            old_value=old_value,
-                                        ),
-                                    )
-                                original_new_claim = new_claim
-                                new_claim = extra_prop_data.claim = existing_claim
-                                self.processed_hook(
-                                    item,
-                                    ProcessReason.replace_value,
-                                    claim=extra_prop_data,
-                                    context=ReplaceValueContext(
-                                        existing_claim=existing_claim,
-                                        new_claim=original_new_claim,
-                                        old_value=old_value,
-                                    ),
-                                )
-                                if (
-                                    len(item.claims[property_id]) > 1
-                                    and extra_prop_data.delete_other_if_replacing
-                                ):
-                                    deleted = item.claims[property_id].copy()
-                                    deleted.remove(new_claim)
-                                    self.processed_hook(
-                                        item,
-                                        ProcessReason.delete_values,
-                                        claim=extra_prop_data,
-                                        context=DeleteValuesContext(
-                                            deleted_claims=deleted
-                                        ),
-                                    )
-                                    item.claims[property_id] = [new_claim]
-                                acted = True
-                                break
-                    else:
-                        # This code section triggers if there are statements for the property but none of them match the one we want to add
-                        # and we did not opt for replacement.
-                        if extra_prop_data.skip_if_conflicting_language_exists and property_id in item.claims:  # type: ignore
-                            found_conflicting_language = False
-                            for existing_claim in item.claims[property_id]:  # type: ignore
-                                existing_claim: pywikibot.Claim
-                                if isinstance(
-                                    existing_claim.getTarget(),
-                                    pywikibot.WbMonolingualText,
-                                ):
-                                    lang_target: pywikibot.WbMonolingualText = existing_claim.getTarget()  # type: ignore
-                                    if lang_target.language == new_claim.getTarget().language and lang_target != new_claim.getTarget():  # type: ignore
-                                        found_conflicting_language = True
-                                        break
-                                else:
-                                    # The existing claim is not a monolingual text, so we can't compare it to the new one
-                                    continue
-                            else:
-                                # If we're here, we did not find a conflicting language
-                                if self.can_add_main_property(
-                                    extra_prop_data
-                                ) and self.whitelisted_claim(extra_prop_data):
-                                    self.processed_hook(
-                                        item,
-                                        ProcessReason.missing_value,
-                                        claim=extra_prop_data,
-                                    )
-                                    add_claim_locally(item, new_claim)
-                                    acted = True
-                                else:
-                                    continue
-                            if found_conflicting_language:
-                                continue
-                        elif extra_prop_data.skip_if_conflicting_exists:
-                            continue
+                    if property_id not in item.claims:
                         if self.can_add_main_property(
                             extra_prop_data
                         ) and self.whitelisted_claim(extra_prop_data):
+                            # This is triggered if there are no statements for the property
                             add_claim_locally(item, new_claim)
-                            self.processed_hook(
-                                item, ProcessReason.missing_value, claim=extra_prop_data
+                            re_cycle |= self.processed_hook(
+                                item,
+                                ProcessReason.missing_property,
+                                claim=extra_prop_data,
                             )
                             acted = True
                         else:
                             continue
-                for qualifier_prop, qualifiers in extra_prop_data.qualifiers.items():
-                    for qualifier_data in qualifiers:
-                        qualifier = qualifier_data.claim
-                        if qualifier not in new_claim.qualifiers.get(
-                            qualifier_prop, []
-                        ) and (
-                            self.whitelisted_claim(extra_prop_data)
-                            or self.whitelisted_qualifier(extra_prop_data, qualifier)
-                        ):
-                            self.processed_hook(
-                                item,
-                                ProcessReason.missing_qualifier_property,
-                                claim=extra_prop_data,
-                                qualifier=qualifier_data,
-                            )
-                            add_qualifier_locally(new_claim, qualifier)
-                            acted = True
-                        else:
-                            for existing_qualifier in new_claim.qualifiers[
-                                qualifier_prop
-                            ]:
-                                if self.same_qualifier(
-                                    existing_qualifier, qualifier, new_claim, item
-                                ):
-                                    break
-                                else:
+                    else:
+                        for existing_claim in item.claims[property_id].copy():
+                            existing_claim: pywikibot.Claim
+                            if self.same_main_property(existing_claim, new_claim, item):
+                                # This is triggered if there is a statement for the property exactly matching the one we want to add
+                                if new_claim.getRank() != existing_claim.getRank():
                                     if (
-                                        qualifier_data.replace_if_conflicting_exists
-                                        and (
-                                            self.whitelisted_claim(extra_prop_data)
-                                            or self.whitelisted_qualifier(
-                                                extra_prop_data, qualifier
-                                            )
-                                        )
+                                        self.whitelisted_claim(extra_prop_data)
+                                        or self.config.copy_ranks_for_nonwhitelisted_main_properties
                                     ):
-                                        old_value = existing_qualifier.getTarget()
-                                        existing_qualifier.setTarget(
-                                            qualifier.getTarget()
-                                        )
-                                        self.processed_hook(
+                                        old_rank = existing_claim.getRank()
+                                        existing_claim.rank = new_claim.getRank()
+                                        re_cycle |= self.processed_hook(
                                             item,
-                                            ProcessReason.replace_qualifier_value,
+                                            ProcessReason.different_rank,
                                             claim=extra_prop_data,
-                                            qualifier=qualifier_data,
-                                            context=ReplaceQualifierValueContext(
-                                                existing_qualifier=existing_qualifier,
-                                                new_qualifier=qualifier,
+                                            context=DifferentRankContext(
+                                                existing_claim=existing_claim,
+                                                old_rank=old_rank,
+                                            ),
+                                        )
+                                        acted = True
+                                new_claim = extra_prop_data.claim = existing_claim
+                                break
+                            else:
+                                if (
+                                    extra_prop_data.replace_if_conflicting_exists
+                                    and self.whitelisted_claim(extra_prop_data)
+                                ):
+                                    # This is triggered if `extra_prop_data.replace_if_conflicting_exists` is set to True
+                                    # and this is the first statement with the property that is not exactly matching the one we want to add
+                                    old_value = existing_claim.getTarget()
+                                    existing_claim.setTarget(new_claim.getTarget())
+                                    if new_claim.getRank() != existing_claim.getRank():
+                                        existing_claim.rank = new_claim.getRank()
+                                        re_cycle |= self.processed_hook(
+                                            item,
+                                            ProcessReason.different_rank,
+                                            claim=extra_prop_data,
+                                            context=DifferentRankContext(
+                                                existing_claim=existing_claim,
                                                 old_value=old_value,
                                             ),
                                         )
-                                        qualifier = (
-                                            qualifier_data.claim
-                                        ) = existing_qualifier
-                                        if (
-                                            len(new_claim.qualifiers[qualifier_prop])
-                                            > 1
-                                            and qualifier_data.delete_other_if_replacing
-                                        ):
-                                            deleted = new_claim.qualifiers[
-                                                qualifier_prop
-                                            ].copy()
-                                            deleted.remove(qualifier)
-                                            self.processed_hook(
-                                                item,
-                                                ProcessReason.delete_qualifier_values,
-                                                claim=extra_prop_data,
-                                                qualifier=qualifier_data,
-                                                context=DeleteQualifierValuesContext(
-                                                    deleted_claims=deleted
-                                                ),
-                                            )
-                                            new_claim.qualifiers[qualifier_prop] = [
-                                                qualifier
-                                            ]
-                                        acted = True
-                                        break
-                            else:
-                                made_new_claim = False
-                                if qualifier_data.skip_if_conflicting_exists:
-                                    continue
-                                elif (
-                                    qualifier_data.make_new_if_conflicting
-                                    and self.whitelisted_claim(extra_prop_data)
-                                ):
-                                    if self.can_add_main_property(extra_prop_data):
-                                        old_claim = new_claim
-                                        new_claim = (
-                                            extra_prop_data.claim
-                                        ) = original_claim
-                                        add_claim_locally(item, new_claim)
-                                        self.processed_hook(
+                                    original_new_claim = new_claim
+                                    new_claim = extra_prop_data.claim = existing_claim
+                                    re_cycle |= self.processed_hook(
+                                        item,
+                                        ProcessReason.replace_value,
+                                        claim=extra_prop_data,
+                                        context=ReplaceValueContext(
+                                            existing_claim=existing_claim,
+                                            new_claim=original_new_claim,
+                                            old_value=old_value,
+                                        ),
+                                    )
+                                    if (
+                                        len(item.claims[property_id]) > 1
+                                        and extra_prop_data.delete_other_if_replacing
+                                    ):
+                                        deleted = item.claims[property_id].copy()
+                                        deleted.remove(new_claim)
+                                        re_cycle |= self.processed_hook(
                                             item,
-                                            ProcessReason.new_claim_from_qualifier,
+                                            ProcessReason.delete_values,
                                             claim=extra_prop_data,
-                                            qualifier=qualifier_data,
-                                            context=NewClaimFromQualifierContext(
-                                                old_claim=old_claim
+                                            context=DeleteValuesContext(
+                                                deleted_claims=deleted
                                             ),
                                         )
+                                        item.claims[property_id] = [new_claim]
+                                    acted = True
+                                    break
+                        else:
+                            # This code section triggers if there are statements for the property but none of them match the one we want to add
+                            # and we did not opt for replacement.
+                            if extra_prop_data.skip_if_conflicting_language_exists and property_id in item.claims:  # type: ignore
+                                found_conflicting_language = False
+                                for existing_claim in item.claims[property_id]:  # type: ignore
+                                    existing_claim: pywikibot.Claim
+                                    if isinstance(
+                                        existing_claim.getTarget(),
+                                        pywikibot.WbMonolingualText,
+                                    ):
+                                        lang_target: pywikibot.WbMonolingualText = existing_claim.getTarget()  # type: ignore
+                                        if lang_target.language == new_claim.getTarget().language and lang_target != new_claim.getTarget():  # type: ignore
+                                            found_conflicting_language = True
+                                            break
+                                    else:
+                                        # The existing claim is not a monolingual text, so we can't compare it to the new one
+                                        continue
+                                else:
+                                    # If we're here, we did not find a conflicting language
+                                    if self.can_add_main_property(
+                                        extra_prop_data
+                                    ) and self.whitelisted_claim(extra_prop_data):
+                                        re_cycle |= self.processed_hook(
+                                            item,
+                                            ProcessReason.missing_value,
+                                            claim=extra_prop_data,
+                                        )
+                                        add_claim_locally(item, new_claim)
                                         acted = True
-                                        made_new_claim = True
                                     else:
                                         continue
-                                add_qualifier_locally(new_claim, qualifier)
-                                if not made_new_claim:
-                                    self.processed_hook(
-                                        item,
-                                        ProcessReason.missing_qualifier_value,
-                                        claim=extra_prop_data,
-                                        qualifier=qualifier_data,
-                                    )
+                                if found_conflicting_language:
+                                    continue
+                            elif extra_prop_data.skip_if_conflicting_exists:
+                                continue
+                            if self.can_add_main_property(
+                                extra_prop_data
+                            ) and self.whitelisted_claim(extra_prop_data):
+                                add_claim_locally(item, new_claim)
+                                re_cycle |= self.processed_hook(
+                                    item,
+                                    ProcessReason.missing_value,
+                                    claim=extra_prop_data,
+                                )
                                 acted = True
-                for extra_reference in extra_prop_data.extra_references:
-                    compatible = False
-                    for existing_reference in new_claim.getSources():
-                        if extra_reference.is_compatible_reference(
-                            existing_reference
-                        ) and (
+                            else:
+                                continue
+                    for (
+                        qualifier_prop,
+                        qualifiers,
+                    ) in extra_prop_data.qualifiers.items():
+                        for qualifier_data in qualifiers:
+                            qualifier = qualifier_data.claim
+                            if qualifier not in new_claim.qualifiers.get(
+                                qualifier_prop, []
+                            ) and (
+                                self.whitelisted_claim(extra_prop_data)
+                                or self.whitelisted_qualifier(
+                                    extra_prop_data, qualifier
+                                )
+                            ):
+                                re_cycle |= self.processed_hook(
+                                    item,
+                                    ProcessReason.missing_qualifier_property,
+                                    claim=extra_prop_data,
+                                    qualifier=qualifier_data,
+                                )
+                                add_qualifier_locally(new_claim, qualifier)
+                                acted = True
+                            else:
+                                for existing_qualifier in new_claim.qualifiers[
+                                    qualifier_prop
+                                ]:
+                                    if self.same_qualifier(
+                                        existing_qualifier, qualifier, new_claim, item
+                                    ):
+                                        break
+                                    else:
+                                        if (
+                                            qualifier_data.replace_if_conflicting_exists
+                                            and (
+                                                self.whitelisted_claim(extra_prop_data)
+                                                or self.whitelisted_qualifier(
+                                                    extra_prop_data, qualifier
+                                                )
+                                            )
+                                        ):
+                                            old_value = existing_qualifier.getTarget()
+                                            existing_qualifier.setTarget(
+                                                qualifier.getTarget()
+                                            )
+                                            re_cycle |= self.processed_hook(
+                                                item,
+                                                ProcessReason.replace_qualifier_value,
+                                                claim=extra_prop_data,
+                                                qualifier=qualifier_data,
+                                                context=ReplaceQualifierValueContext(
+                                                    existing_qualifier=existing_qualifier,
+                                                    new_qualifier=qualifier,
+                                                    old_value=old_value,
+                                                ),
+                                            )
+                                            qualifier = (
+                                                qualifier_data.claim
+                                            ) = existing_qualifier
+                                            if (
+                                                len(
+                                                    new_claim.qualifiers[qualifier_prop]
+                                                )
+                                                > 1
+                                                and qualifier_data.delete_other_if_replacing
+                                            ):
+                                                deleted = new_claim.qualifiers[
+                                                    qualifier_prop
+                                                ].copy()
+                                                deleted.remove(qualifier)
+                                                re_cycle |= self.processed_hook(
+                                                    item,
+                                                    ProcessReason.delete_qualifier_values,
+                                                    claim=extra_prop_data,
+                                                    qualifier=qualifier_data,
+                                                    context=DeleteQualifierValuesContext(
+                                                        deleted_claims=deleted
+                                                    ),
+                                                )
+                                                new_claim.qualifiers[qualifier_prop] = [
+                                                    qualifier
+                                                ]
+                                            acted = True
+                                            break
+                                else:
+                                    made_new_claim = False
+                                    if qualifier_data.skip_if_conflicting_exists:
+                                        continue
+                                    elif (
+                                        qualifier_data.make_new_if_conflicting
+                                        and self.whitelisted_claim(extra_prop_data)
+                                    ):
+                                        if self.can_add_main_property(extra_prop_data):
+                                            old_claim = new_claim
+                                            new_claim = (
+                                                extra_prop_data.claim
+                                            ) = original_claim
+                                            add_claim_locally(item, new_claim)
+                                            re_cycle |= self.processed_hook(
+                                                item,
+                                                ProcessReason.new_claim_from_qualifier,
+                                                claim=extra_prop_data,
+                                                qualifier=qualifier_data,
+                                                context=NewClaimFromQualifierContext(
+                                                    old_claim=old_claim
+                                                ),
+                                            )
+                                            acted = True
+                                            made_new_claim = True
+                                        else:
+                                            continue
+                                    add_qualifier_locally(new_claim, qualifier)
+                                    if not made_new_claim:
+                                        re_cycle |= self.processed_hook(
+                                            item,
+                                            ProcessReason.missing_qualifier_value,
+                                            claim=extra_prop_data,
+                                            qualifier=qualifier_data,
+                                        )
+                                    acted = True
+                    for extra_reference in extra_prop_data.extra_references:
+                        compatible = False
+                        for existing_reference in new_claim.getSources():
+                            if extra_reference.is_compatible_reference(
+                                existing_reference
+                            ) and (
+                                self.whitelisted_claim(extra_prop_data)
+                                or self.whitelisted_reference(
+                                    extra_prop_data, extra_reference
+                                )
+                            ):
+                                compatible = True
+                                if merge_reference_groups(
+                                    existing_reference,
+                                    list(extra_reference.new_reference_props.values()),
+                                ):
+                                    re_cycle |= self.processed_hook(
+                                        item,
+                                        ProcessReason.merged_reference,
+                                        claim=extra_prop_data,
+                                        reference=extra_reference,
+                                        context=MergedReferenceContext(
+                                            existing_reference=existing_reference
+                                        ),
+                                    )
+                                    acted = True
+                                break
+                        if not compatible and (
                             self.whitelisted_claim(extra_prop_data)
                             or self.whitelisted_reference(
                                 extra_prop_data, extra_reference
                             )
                         ):
-                            compatible = True
-                            if merge_reference_groups(
-                                existing_reference,
-                                list(extra_reference.new_reference_props.values()),
-                            ):
-                                self.processed_hook(
-                                    item,
-                                    ProcessReason.merged_reference,
-                                    claim=extra_prop_data,
-                                    reference=extra_reference,
-                                    context=MergedReferenceContext(
-                                        existing_reference=existing_reference
-                                    ),
-                                )
-                                acted = True
-                            break
-                    if not compatible and (
-                        self.whitelisted_claim(extra_prop_data)
-                        or self.whitelisted_reference(extra_prop_data, extra_reference)
-                    ):
-                        self.processed_hook(
-                            item,
-                            ProcessReason.missing_reference,
-                            claim=extra_prop_data,
-                            reference=extra_reference,
-                        )
-                        add_reference_locally(
-                            new_claim, *extra_reference.new_reference_props.values()
-                        )
-                        acted = True
+                            re_cycle |= self.processed_hook(
+                                item,
+                                ProcessReason.missing_reference,
+                                claim=extra_prop_data,
+                                reference=extra_reference,
+                            )
+                            add_reference_locally(
+                                new_claim, *extra_reference.new_reference_props.values()
+                            )
+                            acted = True
         with start_span(
             op="post_output_process", description="Post Output Process Hook"
         ):
             if self.post_output_process_hook(output, item):
-                self.processed_hook(item, ProcessReason.post_output_process_hook)
+                re_cycle |= self.processed_hook(
+                    item, ProcessReason.post_output_process_hook
+                )
                 if not acted:
                     acted = True
         if acted:

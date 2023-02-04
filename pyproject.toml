@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wikidata-bot-framework"
-version = "5.8.0"
+version = "5.9.0"
 description = "A framework for making Wikidata bots."
 readme = "README.md"
 dependencies = [
@@ -34,6 +34,9 @@ classifiers = [
 
 [project.urls]
 repository = "https://github.com/PythonCoderAS/wikidata-bot-framework"
+
+[project.optional-dependencies]
+docs = ["sphinx", "sphinx_rtd_theme"]
 
 [tool.setuptools]
 zip-safe = true

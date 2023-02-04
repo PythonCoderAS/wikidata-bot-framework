@@ -14,6 +14,7 @@ from .dataclasses import ExtraProperty, ExtraQualifier
 
 
 def de_archivify_url_property(prop: ExtraProperty, deprecate: bool = True):
+    """Converts a :class:`.ExtraProperty` with an archive.org URL to a :class:`.ExtraProperty` with the original URL and some qualifiers."""
     full_url = str(prop.claim.getTarget())
     if match := re.search(r"web.archive.org/web/(\d{14})/", full_url):
         prop.claim.setTarget(full_url.replace(match.group(0), ""))

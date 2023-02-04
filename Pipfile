@@ -12,6 +12,8 @@ python-dotenv = "*"
 [dev-packages]
 black = "*"
 isort = "*"
+sphinx = "*"
+sphinx-rtd-theme = "*"
 
 [scripts]
 make-dist = "bash -c 'rm -r dist 2>/dev/null; pyproject-build; twine upload dist/*'"
