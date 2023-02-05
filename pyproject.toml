@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wikidata-bot-framework"
-version = "6.0.3"
+version = "6.0.4"
 description = "A framework for making Wikidata bots."
 readme = "README.md"
 dependencies = [
