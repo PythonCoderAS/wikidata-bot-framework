@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
+from copy import copy
 from dataclasses import dataclass, field
 from typing import Any, Iterable, List, Mapping, Optional, Union, overload
-from copy import copy
 
 import pywikibot
 
