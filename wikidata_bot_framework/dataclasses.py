@@ -103,3 +103,14 @@ class ExtraProperty:
 
     def add_reference(self, reference: ExtraReference):
         self.extra_references.append(reference)
+
+    @staticmethod
+    def _qualifier_sorter(item: tuple[str, list[ExtraQualifier]]):
+        return any(qual.make_new_if_conflicting for qual in item[1])
+
+    def sort_qualifiers(self):
+        """Sorts qualifiers so the ones with :attr:`.ExtraQualifier.make_new_if_conflicting` are first."""
+        self.qualifiers = defaultdict(
+            list,
+            sorted(self.qualifiers.items(), key=self._qualifier_sorter, reverse=True),
+        )

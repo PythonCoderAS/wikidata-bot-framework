@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Iterable, List, Mapping, Optional, Union, overload
+from copy import copy
 
 import pywikibot
 
@@ -394,8 +395,8 @@ class PropertyAdderBot(ABC):
         re_cycle = True
         while re_cycle:
             re_cycle = False
-            for property_id, extra_props in output.items():
-                for extra_prop_data in extra_props:
+            for property_id, extra_props in copy(output).items():
+                for extra_prop_data in extra_props.copy():
                     new_claim = original_claim = extra_prop_data.claim
                     if new_claim.type == "url" and self.config.auto_dearchivify_urls:
                         de_archivify_url_property(
@@ -537,11 +538,12 @@ class PropertyAdderBot(ABC):
                                 acted = True
                             else:
                                 continue
+                    extra_prop_data.sort_qualifiers()
                     for (
                         qualifier_prop,
                         qualifiers,
-                    ) in extra_prop_data.qualifiers.items():
-                        for qualifier_data in qualifiers:
+                    ) in extra_prop_data.qualifiers.copy().items():
+                        for qualifier_data in qualifiers.copy():
                             qualifier = qualifier_data.claim
                             if qualifier not in new_claim.qualifiers.get(
                                 qualifier_prop, []
@@ -562,7 +564,7 @@ class PropertyAdderBot(ABC):
                             else:
                                 for existing_qualifier in new_claim.qualifiers[
                                     qualifier_prop
-                                ]:
+                                ].copy():
                                     if self.same_qualifier(
                                         existing_qualifier, qualifier, new_claim, item
                                     ):
@@ -656,9 +658,9 @@ class PropertyAdderBot(ABC):
                                             qualifier=qualifier_data,
                                         )
                                     acted = True
-                    for extra_reference in extra_prop_data.extra_references:
+                    for extra_reference in extra_prop_data.extra_references.copy():
                         compatible = False
-                        for existing_reference in new_claim.getSources():
+                        for existing_reference in new_claim.getSources().copy():
                             if extra_reference.is_compatible_reference(
                                 existing_reference
                             ) and (
