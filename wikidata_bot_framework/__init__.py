@@ -545,21 +545,19 @@ class PropertyAdderBot(ABC):
                     ) in extra_prop_data.qualifiers.copy().items():
                         for qualifier_data in qualifiers.copy():
                             qualifier = qualifier_data.claim
-                            if qualifier not in new_claim.qualifiers.get(
-                                qualifier_prop, []
-                            ) and (
+                            if not new_claim.qualifiers.get(qualifier_prop, []) and (
                                 self.whitelisted_claim(extra_prop_data)
                                 or self.whitelisted_qualifier(
                                     extra_prop_data, qualifier
                                 )
                             ):
+                                add_qualifier_locally(new_claim, qualifier)
                                 re_cycle |= self.processed_hook(
                                     item,
                                     ProcessReason.missing_qualifier_property,
                                     claim=extra_prop_data,
                                     qualifier=qualifier_data,
                                 )
-                                add_qualifier_locally(new_claim, qualifier)
                                 acted = True
                             else:
                                 for existing_qualifier in new_claim.qualifiers[
