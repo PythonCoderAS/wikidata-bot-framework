@@ -8,6 +8,7 @@ pywikibot = "*"
 mwparserfromhell = "*"
 sentry-sdk = "*"
 python-dotenv = "*"
+typing-extensions = "*"
 
 [dev-packages]
 black = "*"

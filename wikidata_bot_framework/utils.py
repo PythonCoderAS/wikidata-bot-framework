@@ -1,12 +1,12 @@
 import secrets
 from collections import defaultdict
 from copy import copy
-from typing import Literal, MutableMapping, overload
+from typing import Any, Literal, Mapping, MutableMapping, Union, overload
 
 import pywikibot
 
 from .constants import session
-from .dataclasses import ExtraProperty
+from .dataclasses import ExtraProperty, PossibleValueType
 
 
 def add_claim_locally(item: pywikibot.ItemPage, claim: pywikibot.Claim):
@@ -52,6 +52,10 @@ class OutputHelper(
     def add_property(self, prop: ExtraProperty):
         self[prop.claim.getID()].append(prop)
 
+    def add_properties(self, props: list[ExtraProperty]):
+        for prop in props:
+            self.add_property(prop)
+
     def __copy__(self) -> "OutputHelper":
         oh = OutputHelper()
         oh.update(self)
@@ -62,6 +66,90 @@ class OutputHelper(
 
     def copy(self) -> "OutputHelper":
         return copy(self)
+
+    def add_property_from_property_id_and_value(
+        self, property_id: str, value: PossibleValueType
+    ):
+        """Easily add an ExtraProperty from a property ID and a value.
+
+        :param property_id: The property ID.
+        :param value: The value.
+        """
+        self.add_property(ExtraProperty.from_property_id_and_value(property_id, value))
+
+    def add_property_from_property_id_and_values(
+        self, property_id: str, values: list[PossibleValueType]
+    ):
+        """Easily add an ExtraProperty from a property ID and multiple values.
+
+        :param property_id: The property ID.
+        :param values: The values.
+        """
+        self.add_properties(
+            ExtraProperty.from_property_id_and_values(property_id, values)
+        )
+
+    def add_property_from_property_ids_and_values(
+        self,
+        mapping: Mapping[str, Union[PossibleValueType, list[PossibleValueType]]],
+        /,
+        **kwargs: Union[PossibleValueType, list[PossibleValueType]],
+    ):
+        """Easily add ExtraProperties from a mapping of property IDs and values.
+
+        :param mapping: The mapping of property IDs and values.
+        :param kwargs: The mapping of property IDs and values.
+        """
+        final = {**mapping, **kwargs}
+        for property_id, value in final.items():
+            if isinstance(value, list):
+                self.add_property_from_property_id_and_values(property_id, value)
+            else:
+                self.add_property_from_property_id_and_value(property_id, value)
+
+    def add_property_from_property_id_and_item_id_value(
+        self, property_id: str, value: str
+    ):
+        """Easily add an ExtraProperty from a property ID and an item ID value.
+
+        :param property_id: The property ID.
+        :param value: The item ID value.
+        """
+        self.add_property(
+            ExtraProperty.from_property_id_and_item_id_value(property_id, value)
+        )
+
+    def add_property_from_property_id_and_item_id_values(
+        self, property_id: str, values: list[str]
+    ):
+        """Easily add an ExtraProperty from a property ID and multiple item ID values.
+
+        :param property_id: The property ID.
+        :param values: The item ID values.
+        """
+        self.add_properties(
+            ExtraProperty.from_property_id_and_item_id_values(property_id, values)
+        )
+
+    def add_property_from_property_id_and_item_id_values_mapping(
+        self,
+        mapping: Mapping[str, Union[str, list[str]]],
+        /,
+        **kwargs: Union[str, list[str]],
+    ):
+        """Easily add ExtraProperties from a mapping of property IDs and item ID values.
+
+        :param mapping: The mapping of property IDs and item ID values.
+        :param kwargs: The mapping of property IDs and item ID values.
+        """
+        final = {**mapping, **kwargs}
+        for property_id, value in final.items():
+            if isinstance(value, list):
+                self.add_property_from_property_id_and_item_id_values(
+                    property_id, value
+                )
+            else:
+                self.add_property_from_property_id_and_item_id_value(property_id, value)
 
 
 @overload
