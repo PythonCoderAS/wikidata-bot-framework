@@ -91,7 +91,9 @@ class OutputHelper(
 
     def add_property_from_property_ids_and_values(
         self,
-        mapping: Union[Mapping[str, Union[PossibleValueType, list[PossibleValueType]]], None] = None,
+        mapping: Union[
+            Mapping[str, Union[PossibleValueType, list[PossibleValueType]]], None
+        ] = None,
         /,
         **kwargs: Union[PossibleValueType, list[PossibleValueType]],
     ):
@@ -100,7 +102,9 @@ class OutputHelper(
         :param mapping: The mapping of property IDs and values.
         :param kwargs: The mapping of property IDs and values.
         """
-        self.add_properties(ExtraProperty.from_property_ids_and_values(mapping, **kwargs))
+        self.add_properties(
+            ExtraProperty.from_property_ids_and_values(mapping, **kwargs)
+        )
 
     def add_property_from_property_id_and_item_id_value(
         self, property_id: str, value: str

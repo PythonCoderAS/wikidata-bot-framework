@@ -44,7 +44,9 @@ class ClaimShortcutMixin:
     @classmethod
     def from_property_ids_and_values(
         cls,
-        mapping: Union[Mapping[str, Union[PossibleValueType, list[PossibleValueType]]], None] = None,
+        mapping: Union[
+            Mapping[str, Union[PossibleValueType, list[PossibleValueType]]], None
+        ] = None,
         /,
         **kwargs: Union[PossibleValueType, list[PossibleValueType]],
     ) -> list[Self]:
@@ -236,11 +238,15 @@ class ExtraProperty(ClaimShortcutMixin):
         :param property_id: The property ID.
         :param values: The values.
         """
-        self.add_qualifiers(ExtraQualifier.from_property_id_and_values(property_id, values))
+        self.add_qualifiers(
+            ExtraQualifier.from_property_id_and_values(property_id, values)
+        )
 
     def add_qualifiers_with_property_ids_and_values(
         self,
-        mapping: Union[Mapping[str, Union[PossibleValueType, list[PossibleValueType]]], None] = None,
+        mapping: Union[
+            Mapping[str, Union[PossibleValueType, list[PossibleValueType]]], None
+        ] = None,
         /,
         **kwargs: Union[PossibleValueType, list[PossibleValueType]],
     ):
