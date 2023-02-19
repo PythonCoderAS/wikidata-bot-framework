@@ -1,7 +1,7 @@
 import dataclasses
 import datetime
 from collections import defaultdict
-from typing import Literal, MutableMapping, Pattern, Union
+from typing import Any, Literal, MutableMapping, Pattern, Union
 
 import pywikibot
 
@@ -10,8 +10,36 @@ from .constants import retrieved_prop, site, url_prop
 WikidataReference = MutableMapping[str, list[pywikibot.Claim]]
 
 
+class ClaimShortcutMixin:
+    """A mixin class for anything that takes a claim as the only required init argument."""
+
+    @classmethod
+    def from_property_id_and_value(cls, property_id: str, value: Any):
+        """Easily make an ExtraProperty from a property ID and a value.
+
+        :param property_id: The property ID.
+        :param value: The value.
+        :return: The ExtraProperty.
+        """
+        claim = pywikibot.Claim(site, property_id)
+        claim.setTarget(value)
+        return cls(claim)
+
+    @classmethod
+    def from_property_id_and_item_id_value(cls, property_id: str, item_id: str):
+        """Easily make an ExtraProperty from a property ID and an item ID.
+
+        :param property_id: The property ID.
+        :param item_id: The item ID.
+        :return: The ExtraProperty.
+        """
+        claim = pywikibot.Claim(site, property_id)
+        claim.setTarget(pywikibot.ItemPage(site, item_id))
+        return cls(claim)
+
+
 @dataclasses.dataclass
-class ExtraQualifier:
+class ExtraQualifier(ClaimShortcutMixin):
     claim: pywikibot.Claim
     """The claim to add as a qualifier."""
     skip_if_conflicting_exists: bool = False
@@ -79,7 +107,7 @@ class ExtraReference:
 
 
 @dataclasses.dataclass
-class ExtraProperty:
+class ExtraProperty(ClaimShortcutMixin):
     claim: pywikibot.Claim
     """The claim to add."""
     skip_if_conflicting_exists: bool = False
@@ -100,6 +128,18 @@ class ExtraProperty:
 
     def add_qualifier(self, qualifier: ExtraQualifier):
         self.qualifiers[qualifier.claim.getID()].append(qualifier)
+
+    def add_qualifier_with_property_id_and_value(self, property_id: str, value: Any):
+        self.add_qualifier(
+            ExtraQualifier.from_property_id_and_value(property_id, value)
+        )
+
+    def add_qualifier_with_property_id_and_item_id_value(
+        self, property_id: str, item_id: str
+    ):
+        self.add_qualifier(
+            ExtraQualifier.from_property_id_and_item_id_value(property_id, item_id)
+        )
 
     def add_reference(self, reference: ExtraReference):
         self.extra_references.append(reference)
