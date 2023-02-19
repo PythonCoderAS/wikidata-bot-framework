@@ -130,7 +130,7 @@ class OutputHelper(
             ExtraProperty.from_property_id_and_item_id_values(property_id, values)
         )
 
-    def add_property_from_property_id_and_item_id_values(
+    def add_property_from_property_ids_and_item_id_values(
         self,
         mapping: Mapping[str, Union[str, list[str]]],
         /,
