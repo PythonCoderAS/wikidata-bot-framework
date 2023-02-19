@@ -54,13 +54,14 @@ class PropertyAdderBot(ABC):
     def set_config(self, config: Config):
         self.config = config
 
-    @abstractmethod
     def get_edit_group_id(self) -> Union[str, None]:
         """Get the edit group ID for the bot.
 
         This is used to identify the bot in the edit summary.
+
+        :return: The edit group ID for the bot. Return None to omit it.
         """
-        pass
+        return get_random_hex()
 
     @abstractmethod
     def get_edit_summary(self, page: EntityPage) -> str:
