@@ -44,7 +44,7 @@ class ClaimShortcutMixin:
     @classmethod
     def from_property_ids_and_values(
         cls,
-        mapping: Mapping[str, Union[PossibleValueType, list[PossibleValueType]]],
+        mapping: Union[Mapping[str, Union[PossibleValueType, list[PossibleValueType]]], None] = None,
         /,
         **kwargs: Union[PossibleValueType, list[PossibleValueType]],
     ) -> list[Self]:
@@ -54,7 +54,7 @@ class ClaimShortcutMixin:
         :param kwargs: The mapping of property IDs and values.
         :return: The new instance.
         """
-        final = {**mapping, **kwargs}
+        final = {**(mapping or {}), **kwargs}
         retvals = []
         for key, value in final.items():
             if isinstance(value, list):
@@ -208,6 +208,14 @@ class ExtraProperty(ClaimShortcutMixin):
         """
         self.qualifiers[qualifier.claim.getID()].append(qualifier)
 
+    def add_qualifiers(self, qualifiers: list[ExtraQualifier]):
+        """Add qualifiers to the claim.
+
+        :param qualifiers: The qualifiers to add.
+        """
+        for qualifier in qualifiers:
+            self.add_qualifier(qualifier)
+
     def add_qualifier_with_property_id_and_value(
         self, property_id: str, value: PossibleValueType
     ):
@@ -228,12 +236,11 @@ class ExtraProperty(ClaimShortcutMixin):
         :param property_id: The property ID.
         :param values: The values.
         """
-        for value in values:
-            self.add_qualifier_with_property_id_and_value(property_id, value)
+        self.add_qualifiers(ExtraQualifier.from_property_id_and_values(property_id, values))
 
     def add_qualifiers_with_property_ids_and_values(
         self,
-        mapping: Mapping[str, Union[PossibleValueType, list[PossibleValueType]]],
+        mapping: Union[Mapping[str, Union[PossibleValueType, list[PossibleValueType]]], None] = None,
         /,
         **kwargs: Union[PossibleValueType, list[PossibleValueType]],
     ):
@@ -242,12 +249,9 @@ class ExtraProperty(ClaimShortcutMixin):
         :param mapping: A mapping of property ID and either a single value or a list of values.
         :param kwargs: Extra keys for the mapping.
         """
-        final = {**mapping, **kwargs}
-        for property_id, value in final.items():
-            if isinstance(value, list):
-                self.add_qualifiers_with_property_id_and_values(property_id, value)
-            else:
-                self.add_qualifier_with_property_id_and_value(property_id, value)
+        self.add_qualifiers(
+            ExtraQualifier.from_property_ids_and_values(mapping, **kwargs)
+        )
 
     def add_qualifier_with_property_id_and_item_id_value(
         self, property_id: str, item_id: str
@@ -269,8 +273,9 @@ class ExtraProperty(ClaimShortcutMixin):
         :param property_id: The property ID.
         :param item_ids: The item IDs.
         """
-        for item_id in item_ids:
-            self.add_qualifier_with_property_id_and_item_id_value(property_id, item_id)
+        self.add_qualifiers(
+            ExtraQualifier.from_property_id_and_item_id_values(property_id, item_ids)
+        )
 
     def add_qualifiers_with_property_ids_and_item_id_values(
         self,
@@ -283,16 +288,9 @@ class ExtraProperty(ClaimShortcutMixin):
         :param mapping: A mapping of property ID and either a single item ID or a list of item IDs.
         :param kwargs: Extra keys for the mapping.
         """
-        final = {**mapping, **kwargs}
-        for property_id, item_id in final.items():
-            if isinstance(item_id, list):
-                self.add_qualifiers_with_property_id_and_item_id_values(
-                    property_id, item_id
-                )
-            else:
-                self.add_qualifier_with_property_id_and_item_id_value(
-                    property_id, item_id
-                )
+        self.add_qualifiers(
+            ExtraQualifier.from_property_ids_and_item_id_values(mapping, **kwargs)
+        )
 
     def add_reference(self, reference: ExtraReference):
         """Add a reference to the claim.

@@ -91,7 +91,7 @@ class OutputHelper(
 
     def add_property_from_property_ids_and_values(
         self,
-        mapping: Mapping[str, Union[PossibleValueType, list[PossibleValueType]]],
+        mapping: Union[Mapping[str, Union[PossibleValueType, list[PossibleValueType]]], None] = None,
         /,
         **kwargs: Union[PossibleValueType, list[PossibleValueType]],
     ):
@@ -100,12 +100,7 @@ class OutputHelper(
         :param mapping: The mapping of property IDs and values.
         :param kwargs: The mapping of property IDs and values.
         """
-        final = {**mapping, **kwargs}
-        for property_id, value in final.items():
-            if isinstance(value, list):
-                self.add_property_from_property_id_and_values(property_id, value)
-            else:
-                self.add_property_from_property_id_and_value(property_id, value)
+        self.add_properties(ExtraProperty.from_property_ids_and_values(mapping, **kwargs))
 
     def add_property_from_property_id_and_item_id_value(
         self, property_id: str, value: str
@@ -131,7 +126,7 @@ class OutputHelper(
             ExtraProperty.from_property_id_and_item_id_values(property_id, values)
         )
 
-    def add_property_from_property_id_and_item_id_values_mapping(
+    def add_property_from_property_id_and_item_id_values(
         self,
         mapping: Mapping[str, Union[str, list[str]]],
         /,
@@ -142,14 +137,9 @@ class OutputHelper(
         :param mapping: The mapping of property IDs and item ID values.
         :param kwargs: The mapping of property IDs and item ID values.
         """
-        final = {**mapping, **kwargs}
-        for property_id, value in final.items():
-            if isinstance(value, list):
-                self.add_property_from_property_id_and_item_id_values(
-                    property_id, value
-                )
-            else:
-                self.add_property_from_property_id_and_item_id_value(property_id, value)
+        self.add_properties(
+            ExtraProperty.from_property_ids_and_item_id_values(mapping, **kwargs)
+        )
 
 
 @overload
