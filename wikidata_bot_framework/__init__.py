@@ -50,6 +50,7 @@ class PropertyAdderBot(ABC):
     def __init__(self):
         load_sentry()
         self.config = Config()
+        self.__random_hex = get_random_hex()
 
     def set_config(self, config: Config):
         self.config = config
@@ -61,7 +62,7 @@ class PropertyAdderBot(ABC):
 
         :return: The edit group ID for the bot. Return None to omit it.
         """
-        return get_random_hex()
+        return self.__random_hex
 
     @abstractmethod
     def get_edit_summary(self, page: EntityPage) -> str:
