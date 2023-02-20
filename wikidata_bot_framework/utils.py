@@ -132,7 +132,7 @@ class OutputHelper(
 
     def add_property_from_property_ids_and_item_id_values(
         self,
-        mapping: Mapping[str, Union[str, list[str]]],
+        mapping: Union[Mapping[str, Union[str, list[str]]], None] = None,
         /,
         **kwargs: Union[str, list[str]],
     ):

@@ -95,7 +95,7 @@ class ClaimShortcutMixin:
     @classmethod
     def from_property_ids_and_item_id_values(
         cls,
-        mapping: Mapping[str, Union[str, list[str]]],
+        mapping: Union[Mapping[str, Union[str, list[str]]], None] = None,
         /,
         **kwargs: Union[str, list[str]],
     ) -> list[Self]:
@@ -285,7 +285,7 @@ class ExtraProperty(ClaimShortcutMixin):
 
     def add_qualifiers_with_property_ids_and_item_id_values(
         self,
-        mapping: Mapping[str, Union[str, list[str]]],
+        mapping: Union[Mapping[str, Union[str, list[str]]], None] = None,
         /,
         **kwargs: Union[str, list[str]],
     ):
