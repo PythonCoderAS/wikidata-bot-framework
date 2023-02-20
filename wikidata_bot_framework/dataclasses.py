@@ -105,7 +105,7 @@ class ClaimShortcutMixin:
         :param kwargs: The mapping of property IDs and item ID values.
         :return: The new instance.
         """
-        final = {**mapping, **kwargs}
+        final = {**(mapping or {}), **kwargs}
         retvals = []
         for key, value in final.items():
             if isinstance(value, list):
