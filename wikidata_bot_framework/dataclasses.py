@@ -13,7 +13,7 @@ PossibleValueType = Any
 
 
 class ClaimShortcutMixin:
-    """A mixin class for PossibleValueTypething that takes a claim as the only required init argument."""
+    """A mixin class for anything that takes a claim as the only required init argument."""
 
     @classmethod
     def from_property_id_and_value(
@@ -307,7 +307,7 @@ class ExtraProperty(ClaimShortcutMixin):
 
     @staticmethod
     def _qualifier_sorter(item: tuple[str, list[ExtraQualifier]]):
-        return PossibleValueType(qual.make_new_if_conflicting for qual in item[1])
+        return any(qual.make_new_if_conflicting for qual in item[1])
 
     def sort_qualifiers(self):
         """Sorts qualifiers so the ones with :attr:`.ExtraQualifier.make_new_if_conflicting` are first."""
