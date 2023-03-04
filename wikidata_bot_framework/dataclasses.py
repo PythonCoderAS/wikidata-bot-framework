@@ -172,7 +172,8 @@ class ExtraReference:
     def is_compatible_reference(self, reference: WikidataReference) -> bool:
         if self.url_match_pattern and url_prop in reference:
             for claim in reference[url_prop]:
-                if self.url_match_pattern.match(claim.getTarget()):  # type: ignore
+                target = claim.getTarget()
+                if target and self.url_match_pattern.match(target):  # type: ignore
                     return True
         for prop, claim in self.match_property_values.items():
             if prop not in reference:
