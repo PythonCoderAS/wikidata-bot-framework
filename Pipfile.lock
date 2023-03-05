@@ -170,11 +170,11 @@
         },
         "pywikibot": {
             "hashes": [
-                "sha256:6740a43d0a53690e26b4df4f6e697d2bf8b95170c954013c41253cb8d0f63c4b",
-                "sha256:6be51d542321c28bda5cdda1157482a4c615182e5251b5ab0b67299e417d49c0"
+                "sha256:66b95cfc54e656a5d98cf1c07585ee20f13b8e4efc338d2656a11722df2728b1",
+                "sha256:b091bbc3ff7a09a08815d6de9114e2f6542de2df2bd81e640888c33ea0fb7918"
             ],
             "index": "pypi",
-            "version": "==8.0.0"
+            "version": "==8.0.1"
         },
         "requests": {
             "hashes": [
@@ -228,11 +228,11 @@
         },
         "babel": {
             "hashes": [
-                "sha256:1ad3eca1c885218f6dce2ab67291178944f810a10a9b5f3cb8382a5a232b64fe",
-                "sha256:5ef4b3226b0180dedded4229651c8b0e1a3a6a2837d45a073272f313e4cf97f6"
+                "sha256:b4246fb7677d3b98f501a39d43396d3cafdc8eadb045f4a31be01863f655c610",
+                "sha256:cc2d99999cd01d44420ae725a21c9e3711b3aadc7976d6147f622d8581963455"
             ],
-            "markers": "python_version >= '3.6'",
-            "version": "==2.11.0"
+            "markers": "python_version >= '3.7'",
+            "version": "==2.12.1"
         },
         "black": {
             "hashes": [
@@ -497,11 +497,11 @@
         },
         "platformdirs": {
             "hashes": [
-                "sha256:8a1228abb1ef82d788f74139988b137e78692984ec7b08eaa6c65f1723af28f9",
-                "sha256:b1d5eb14f221506f50d6604a561f4c5786d9e80355219694a1b244bcd96f4567"
+                "sha256:13b08a53ed71021350c9e300d4ea8668438fb0046ab3937ac9a29913a1a1350a",
+                "sha256:accc3665857288317f32c7bebb5a8e482ba717b474f3fc1d18ca7f9214be0cef"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==3.0.0"
+            "version": "==3.1.0"
         },
         "pygments": {
             "hashes": [
@@ -510,13 +510,6 @@
             ],
             "markers": "python_version >= '3.6'",
             "version": "==2.14.0"
-        },
-        "pytz": {
-            "hashes": [
-                "sha256:01a0681c4b9684a28304615eba55d1ab31ae00bf68ec157ec3708a8182dbbcd0",
-                "sha256:78f4f37d8198e0627c5f1143240bb0206b8691d8d7ac6d78fee88b78733f8c4a"
-            ],
-            "version": "==2022.7.1"
         },
         "requests": {
             "hashes": [
@@ -562,7 +555,7 @@
                 "sha256:29d341f67fb0f6f586b23ad80e072c8e6ad0b48417db2bde114a4c9746feb228",
                 "sha256:828f867945bbe39817c210a1abfd1bc4895c8b73fcaade56d45357a348a07d7e"
             ],
-            "markers": "python_full_version >= '3.8.0'",
+            "markers": "python_version >= '3.8'",
             "version": "==1.0.4"
         },
         "sphinxcontrib-devhelp": {
@@ -578,7 +571,7 @@
                 "sha256:0cbdd302815330058422b98a113195c9249825d681e18f11e8b1f78a2f11efff",
                 "sha256:c38cb46dccf316c79de6e5515e1770414b797162b23cd3d06e67020e1d2a6903"
             ],
-            "markers": "python_full_version >= '3.8.0'",
+            "markers": "python_version >= '3.8'",
             "version": "==2.0.1"
         },
         "sphinxcontrib-jquery": {
