@@ -706,7 +706,7 @@ class PropertyAdderBot(ABC):
         ):
             if self.post_output_process_hook(output, item):
                 re_cycle |= self.processed_hook(
-                    item, ProcessReason.post_output_process_hook
+                    item, ProcessReason.post_output
                 )
                 if not acted:
                     acted = True
