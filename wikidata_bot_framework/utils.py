@@ -1,11 +1,11 @@
 import secrets
 from collections import defaultdict
 from copy import copy
-from typing import Any, Literal, Mapping, MutableMapping, Union, overload
+from typing import Literal, Mapping, MutableMapping, Union, overload
 
 import pywikibot
 
-from .constants import session
+from .constants import session, preferred_rank_reason_prop, site
 from .dataclasses import ExtraProperty, PossibleValueType
 
 
@@ -265,3 +265,31 @@ def get_random_hex(num_chars: int = 32):
     :return: A random hex string.
     """
     return secrets.token_hex(num_chars // 2)
+
+
+def mark_claim_as_preferred(
+    claim: Union[pywikibot.Claim, list[pywikibot.Claim]],
+    claim_list: list[pywikibot.Claim],
+    reason_for_preferred_rank_item: Union[pywikibot.ItemPage, None] = None,
+):
+    """Mark a claim as preferred.
+
+    :param claim: The claim or list of claims to mark as preferred.
+    :param claim_list: The list of claims that have the same property as the target claim The target claim(s) will be marked preferred while all other claims will be unmarked.
+    :param reason_for_preferred_rank_item: The item to use as the value for the qualifer "reason for preferred rank". Leave blank to not include the qualifier.
+    """
+    if not isinstance(claim, list):
+        claim = [claim]
+    for c in claim_list:
+        if c in claim:
+            c.rank = "preferred"
+            if reason_for_preferred_rank_item:
+                qual = pywikibot.Claim(
+                    site, preferred_rank_reason_prop, is_qualifier=True
+                )
+                qual.setTarget(reason_for_preferred_rank_item)
+                c.qualifiers[preferred_rank_reason_prop] = [qual]
+        else:
+            c.rank = "normal"
+            if preferred_rank_reason_prop in c.qualifiers:
+                del c.qualifiers[preferred_rank_reason_prop]

@@ -20,6 +20,8 @@ archive_url_prop = "P1065"
 archive_date_prop = "P2960"
 deprecated_reason_prop = "P2241"
 link_rot_id = "Q1193907"
+preferred_rank_reason_prop = "P7452"
+
 site: pywikibot.DataSite = pywikibot.Site("wikidata", "wikidata")
 
 EntityPage = Union[pywikibot.ItemPage, pywikibot.PropertyPage, pywikibot.LexemePage]
