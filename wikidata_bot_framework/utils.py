@@ -271,25 +271,35 @@ def mark_claim_as_preferred(
     claim: Union[pywikibot.Claim, list[pywikibot.Claim]],
     claim_list: list[pywikibot.Claim],
     reason_for_preferred_rank_item: Union[pywikibot.ItemPage, None] = None,
-):
+) -> bool:
     """Mark a claim as preferred.
 
     :param claim: The claim or list of claims to mark as preferred.
     :param claim_list: The list of claims that have the same property as the target claim The target claim(s) will be marked preferred while all other claims will be unmarked.
     :param reason_for_preferred_rank_item: The item to use as the value for the qualifer "reason for preferred rank". Leave blank to not include the qualifier.
+    :return: True if the rank of any claims were changed.
     """
     if not isinstance(claim, list):
         claim = [claim]
+    changed = False
     for c in claim_list:
         if c in claim:
-            c.rank = "preferred"
+            if not c.rank == "preferred":
+                c.rank = "preferred"
+                changed = True
             if reason_for_preferred_rank_item:
                 qual = pywikibot.Claim(
                     site, preferred_rank_reason_prop, is_qualifier=True
                 )
                 qual.setTarget(reason_for_preferred_rank_item)
-                c.qualifiers[preferred_rank_reason_prop] = [qual]
+                if c.qualifiers.get(preferred_rank_reason_prop, None) != [qual]:
+                    c.qualifiers[preferred_rank_reason_prop] = [qual]
+                    changed = True
         else:
-            c.rank = "normal"
+            if c.rank == "preferred":
+                c.rank = "normal"
+                changed = True
             if preferred_rank_reason_prop in c.qualifiers:
                 del c.qualifiers[preferred_rank_reason_prop]
+                changed = True
+    return changed
