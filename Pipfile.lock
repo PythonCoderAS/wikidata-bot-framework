@@ -102,7 +102,7 @@
                 "sha256:f779d3ad205f108d14e99bb3859aa7dd8e9c68874617c72354d7ecaec2a054ac",
                 "sha256:f87f746ee241d30d6ed93969de31e5ffd09a2961a051e60ae6bddde9ec3583aa"
             ],
-            "markers": "python_full_version >= '3.7.0'",
+            "markers": "python_version >= '3.7'",
             "version": "==3.2.0"
         },
         "idna": {
@@ -157,11 +157,11 @@
         },
         "pywikibot": {
             "hashes": [
-                "sha256:193a1b56e6ffc44f981b9a87ccfe022b7084e8d0f626635990bd9dc712c07033",
-                "sha256:d6d0cd748ee5534ffecf8ebdd831949b795935cf31127f313b1a115e44de87f2"
+                "sha256:1fa5c408da2ec22e0d78ac7e95213d7208864e6928b3edbfd490689fccc72cf8",
+                "sha256:6f1fef5ce1712afd303837855262bcd802e056759da92cd1216d21e8faae8de3"
             ],
             "index": "pypi",
-            "version": "==8.2.0"
+            "version": "==8.3.0"
         },
         "requests": {
             "hashes": [
@@ -335,7 +335,7 @@
                 "sha256:f779d3ad205f108d14e99bb3859aa7dd8e9c68874617c72354d7ecaec2a054ac",
                 "sha256:f87f746ee241d30d6ed93969de31e5ffd09a2961a051e60ae6bddde9ec3583aa"
             ],
-            "markers": "python_full_version >= '3.7.0'",
+            "markers": "python_version >= '3.7'",
             "version": "==3.2.0"
         },
         "click": {
