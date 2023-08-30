@@ -102,7 +102,7 @@
                 "sha256:f779d3ad205f108d14e99bb3859aa7dd8e9c68874617c72354d7ecaec2a054ac",
                 "sha256:f87f746ee241d30d6ed93969de31e5ffd09a2961a051e60ae6bddde9ec3583aa"
             ],
-            "markers": "python_version >= '3.7'",
+            "markers": "python_full_version >= '3.7.0'",
             "version": "==3.2.0"
         },
         "idna": {
@@ -157,18 +157,18 @@
         },
         "pywikibot": {
             "hashes": [
-                "sha256:6fe9d4c2496a485d5751ea8328d40d0ac9f52b50e3ae9ca4113b9176af92c4c0",
-                "sha256:c89b4da21ff5b0fdd2c7d4e6f12945bf8402cce298ea580d4d1693fd777ff9f4"
+                "sha256:13d540d0876c38d8dbf962ae74374300e8c2bef0694c17ebd8e93af1bb6c8e06",
+                "sha256:dec671b3ef9b8dcff1061878ae5e8d579ec25b9263db6e6b278139140870e083"
             ],
             "index": "pypi",
-            "version": "==8.3.1"
+            "version": "==8.3.2"
         },
         "requests": {
             "hashes": [
                 "sha256:58cd2187c01e70e6e26505bca751777aa9f2ee0b7f4300988b709f44e013003f",
                 "sha256:942c5a758f98d790eaed1a29cb6eefc7ffb0d1cf7af05c3d2791656dbd6ad1e1"
             ],
-            "markers": "python_version >= '3.7'",
+            "markers": "python_full_version >= '3.7.0'",
             "version": "==2.31.0"
         },
         "sentry-sdk": {
@@ -335,7 +335,7 @@
                 "sha256:f779d3ad205f108d14e99bb3859aa7dd8e9c68874617c72354d7ecaec2a054ac",
                 "sha256:f87f746ee241d30d6ed93969de31e5ffd09a2961a051e60ae6bddde9ec3583aa"
             ],
-            "markers": "python_version >= '3.7'",
+            "markers": "python_full_version >= '3.7.0'",
             "version": "==3.2.0"
         },
         "click": {
@@ -487,7 +487,7 @@
                 "sha256:58cd2187c01e70e6e26505bca751777aa9f2ee0b7f4300988b709f44e013003f",
                 "sha256:942c5a758f98d790eaed1a29cb6eefc7ffb0d1cf7af05c3d2791656dbd6ad1e1"
             ],
-            "markers": "python_version >= '3.7'",
+            "markers": "python_full_version >= '3.7.0'",
             "version": "==2.31.0"
         },
         "snowballstemmer": {
