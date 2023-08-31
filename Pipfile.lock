@@ -102,7 +102,7 @@
                 "sha256:f779d3ad205f108d14e99bb3859aa7dd8e9c68874617c72354d7ecaec2a054ac",
                 "sha256:f87f746ee241d30d6ed93969de31e5ffd09a2961a051e60ae6bddde9ec3583aa"
             ],
-            "markers": "python_full_version >= '3.7.0'",
+            "markers": "python_version >= '3.7'",
             "version": "==3.2.0"
         },
         "idna": {
@@ -168,7 +168,7 @@
                 "sha256:58cd2187c01e70e6e26505bca751777aa9f2ee0b7f4300988b709f44e013003f",
                 "sha256:942c5a758f98d790eaed1a29cb6eefc7ffb0d1cf7af05c3d2791656dbd6ad1e1"
             ],
-            "markers": "python_full_version >= '3.7.0'",
+            "markers": "python_version >= '3.7'",
             "version": "==2.31.0"
         },
         "sentry-sdk": {
@@ -335,7 +335,7 @@
                 "sha256:f779d3ad205f108d14e99bb3859aa7dd8e9c68874617c72354d7ecaec2a054ac",
                 "sha256:f87f746ee241d30d6ed93969de31e5ffd09a2961a051e60ae6bddde9ec3583aa"
             ],
-            "markers": "python_full_version >= '3.7.0'",
+            "markers": "python_version >= '3.7'",
             "version": "==3.2.0"
         },
         "click": {
@@ -487,7 +487,7 @@
                 "sha256:58cd2187c01e70e6e26505bca751777aa9f2ee0b7f4300988b709f44e013003f",
                 "sha256:942c5a758f98d790eaed1a29cb6eefc7ffb0d1cf7af05c3d2791656dbd6ad1e1"
             ],
-            "markers": "python_full_version >= '3.7.0'",
+            "markers": "python_version >= '3.7'",
             "version": "==2.31.0"
         },
         "snowballstemmer": {
@@ -499,11 +499,11 @@
         },
         "sphinx": {
             "hashes": [
-                "sha256:1aeec862bf1edff4374012ac38082e0d1daa066c9e327841a846401164797988",
-                "sha256:9b3aa23254ffc5be468646810543e491653bf5a67f3f23e4ccd4e515b0bd0b9c"
+                "sha256:1a9290001b75c497fd087e92b0334f1bbfa1a1ae7fddc084990c4b7bd1130b88",
+                "sha256:9269f9ed2821c9ebd30e4204f5c2339f5d4980e377bc89cb2cb6f9b17409c20a"
             ],
             "index": "pypi",
-            "version": "==7.2.4"
+            "version": "==7.2.5"
         },
         "sphinx-rtd-theme": {
             "hashes": [
