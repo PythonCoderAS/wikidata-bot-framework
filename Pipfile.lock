@@ -172,12 +172,12 @@
         },
         "pywikibot": {
             "hashes": [
-                "sha256:5b8a501213689bdb6ad04c1bfcc0739158cf2c20cf8925e08b34fef29dcf52a1",
-                "sha256:ddcd2e8028475533860fc77ffd0b9136a64c9afa2bc375029857b65e69be12f2"
+                "sha256:380454e6b6e53a74f4925d1afaed9b485325fa62f8d475eb3931a5b83a1e0015",
+                "sha256:5c273a0affbaaeb8608e69544739447146b7a95ed19a4f2425d8a5f3f8578694"
             ],
             "index": "pypi",
             "markers": "python_full_version >= '3.6.1'",
-            "version": "==8.5.1"
+            "version": "==8.6.0"
         },
         "requests": {
             "hashes": [
