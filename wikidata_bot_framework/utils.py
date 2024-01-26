@@ -17,6 +17,7 @@ def add_qualifier_locally(claim: pywikibot.Claim, qualifier: pywikibot.Claim):
     qualifier.isQualifier = True
     claim.qualifiers.setdefault(qualifier.getID(), []).append(qualifier)
 
+
 def remove_qualifiers(claim: pywikibot.Claim, qualifiers: List[pywikibot.Claim]):
     for qualifier in qualifiers:
         if qualifier in claim.qualifiers.get(qualifier.getID(), []):

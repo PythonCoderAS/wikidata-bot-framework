@@ -17,43 +17,43 @@ from .constants import (
     link_rot_id,  # noqa: F401
     preferred_rank_reason_prop,  # noqa: F401
     site,  # noqa: F401
-    EntityPage,
+    EntityPage,  # noqa: F401
 )
 from .dataclasses import (
     ClaimShortcutMixin,  # noqa: F401
-    ExtraProperty,
-    ExtraQualifier,
-    ExtraReference,
+    ExtraProperty,  # noqa: F401
+    ExtraQualifier,  # noqa: F401
+    ExtraReference,  # noqa: F401
 )
 from .process_reason import (
-    ProcessReason,
-    DifferentRankContext,
-    ReplaceValueContext,
-    DeleteValuesContext,
-    ReplaceQualifierValueContext,
-    DeleteQualifierValuesContext,
-    NewClaimFromQualifierContext,
-    MergedReferenceContext,
-)  # noqa: F401
+    ProcessReason,  # noqa: F401
+    DifferentRankContext,  # noqa: F401
+    ReplaceValueContext,  # noqa: F401
+    DeleteValuesContext,  # noqa: F401
+    ReplaceQualifierValueContext,  # noqa: F401
+    DeleteQualifierValuesContext,  # noqa: F401
+    NewClaimFromQualifierContext,  # noqa: F401
+    MergedReferenceContext,  # noqa: F401
+)
 from .sentry import (
     sentry_avilable,  # noqa: F401
-    load_sentry,
-    report_exception,
-    start_span,
-    start_transaction,
-)  # noqa: F401
+    load_sentry,  # noqa: F401
+    report_exception,  # noqa: F401
+    start_span,  # noqa: F401
+    start_transaction,  # noqa: F401
+)
 from .transformers import de_archivify_url_property  # noqa: F401
 from .utils import (
-    add_claim_locally,
-    add_qualifier_locally,
-    add_reference_locally,
-    get_random_hex,
+    add_claim_locally,  # noqa: F401
+    add_qualifier_locally,  # noqa: F401
+    add_reference_locally,  # noqa: F401
+    get_random_hex,  # noqa: F401
     append_to_source,  # noqa: F401
-    merge_reference_groups,
+    merge_reference_groups,  # noqa: F401
     OutputHelper,  # noqa: F401
-    mark_claim_as_preferred,
+    mark_claim_as_preferred,  # noqa: F401
     remove_qualifiers,  # noqa: F401
-)  # noqa: F401
+)
 
 Output = Mapping[str, List[ExtraProperty]]
 
