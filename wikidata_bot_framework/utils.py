@@ -37,7 +37,7 @@ def merge_reference_groups(
 ) -> bool:
     acted = False
     for new_reference in new_references:
-        if not new_reference.getID() in reference_group:
+        if new_reference.getID() not in reference_group:
             reference_group.setdefault(new_reference.getID(), []).append(new_reference)
             acted = True
     return acted

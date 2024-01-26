@@ -1,16 +1,58 @@
 from abc import ABC, abstractmethod
 from copy import copy
 from dataclasses import dataclass, field
-from typing import Any, Iterable, List, Mapping, Optional, Union, overload
+from typing import Any, Iterable, List, Literal, Mapping, Optional, Union, overload
 
 import pywikibot
 
-from .constants import *
-from .dataclasses import *
-from .process_reason import *
-from .sentry import *
-from .transformers import *
-from .utils import *
+# Make all imports from submodules available here
+
+from .constants import (
+    session,  # noqa: F401
+    url_prop,  # noqa: F401
+    retrieved_prop,  # noqa: F401
+    archive_date_prop,  # noqa: F401
+    archive_url_prop,  # noqa: F401
+    deprecated_reason_prop,  # noqa: F401
+    link_rot_id,  # noqa: F401
+    preferred_rank_reason_prop,  # noqa: F401
+    site,  # noqa: F401
+    EntityPage,
+)
+from .dataclasses import (
+    ClaimShortcutMixin,  # noqa: F401
+    ExtraProperty,
+    ExtraQualifier,
+    ExtraReference,
+)
+from .process_reason import (
+    ProcessReason,
+    DifferentRankContext,
+    ReplaceValueContext,
+    DeleteValuesContext,
+    ReplaceQualifierValueContext,
+    DeleteQualifierValuesContext,
+    NewClaimFromQualifierContext,
+    MergedReferenceContext,
+)  # noqa: F401
+from .sentry import (
+    sentry_avilable,  # noqa: F401
+    load_sentry,
+    report_exception,
+    start_span,
+    start_transaction,
+)  # noqa: F401
+from .transformers import de_archivify_url_property  # noqa: F401
+from .utils import (
+    add_claim_locally,
+    add_qualifier_locally,
+    add_reference_locally,
+    get_random_hex,
+    append_to_source,  # noqa: F401
+    merge_reference_groups,
+    OutputHelper,  # noqa: F401
+    mark_claim_as_preferred,  # noqa: F401
+)  # noqa: F401
 
 Output = Mapping[str, List[ExtraProperty]]
 
@@ -73,11 +115,15 @@ class PropertyAdderBot(ABC):
         """
         pass
 
-    def _get_full_summary(self, page: EntityPage):
-        base = self.get_edit_summary(page)
+    def get_full_summary(self, message: str) -> str:
+        """Get a fully formatted summary that can be used to update the API and track it to the EditGroup.
+
+        :param message: The message to format with. To use the default summary, pass in the result of :meth:`.get_edit_summary`.
+        :return: The fully formatted summary.
+        """
         if edit_group_id := self.get_edit_group_id():
-            return f"{base} ([[:toolforge:editgroups/b/CB/{edit_group_id}|details]])"
-        return base
+            return f"{message} ([[:toolforge:editgroups/b/CB/{edit_group_id}|details]])"
+        return message
 
     @abstractmethod
     def run_item(
@@ -495,7 +541,10 @@ class PropertyAdderBot(ABC):
                         else:
                             # This code section triggers if there are statements for the property but none of them match the one we want to add
                             # and we did not opt for replacement.
-                            if extra_prop_data.skip_if_conflicting_language_exists and property_id in item.claims:  # type: ignore
+                            if (
+                                extra_prop_data.skip_if_conflicting_language_exists
+                                and property_id in item.claims
+                            ):  # type: ignore
                                 found_conflicting_language = False
                                 for existing_claim in item.claims[property_id]:  # type: ignore
                                     existing_claim: pywikibot.Claim
@@ -503,8 +552,14 @@ class PropertyAdderBot(ABC):
                                         existing_claim.getTarget(),
                                         pywikibot.WbMonolingualText,
                                     ):
-                                        lang_target: pywikibot.WbMonolingualText = existing_claim.getTarget()  # type: ignore
-                                        if lang_target.language == new_claim.getTarget().language and lang_target != new_claim.getTarget():  # type: ignore
+                                        lang_target: pywikibot.WbMonolingualText = (
+                                            existing_claim.getTarget()
+                                        )  # type: ignore
+                                        if (
+                                            lang_target.language
+                                            == new_claim.getTarget().language
+                                            and lang_target != new_claim.getTarget()
+                                        ):  # type: ignore
                                             found_conflicting_language = True
                                             break
                                     else:
@@ -719,7 +774,9 @@ class PropertyAdderBot(ABC):
                     ):
                         try:
                             item.editEntity(
-                                summary=self._get_full_summary(item),
+                                summary=self.get_full_summary(
+                                    self.get_edit_summary(item)
+                                ),
                                 bot=True,
                             )
                             break

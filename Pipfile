@@ -11,13 +11,17 @@ python-dotenv = "*"
 typing-extensions = "*"
 
 [dev-packages]
-black = "*"
-isort = "*"
 sphinx = "*"
 sphinx-rtd-theme = "*"
+ruff = "*"
+pytest = "*"
+build = "*"
 
 [scripts]
 make-dist = "bash -c 'rm -r dist 2>/dev/null; pyproject-build; twine upload dist/*'"
+test = "pytest"
+lint = "ruff check ."
+format = "ruff format ."
 
 [requires]
-python_version = "3.10"
+python_version = "3.12"

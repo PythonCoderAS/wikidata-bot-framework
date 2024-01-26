@@ -1,6 +1,7 @@
 from typing import Union
 
 import pywikibot
+from pywikibot.site import DataSite
 from requests import Session
 from requests.adapters import HTTPAdapter, Retry
 
@@ -22,6 +23,6 @@ deprecated_reason_prop = "P2241"
 link_rot_id = "Q1193907"
 preferred_rank_reason_prop = "P7452"
 
-site: pywikibot.DataSite = pywikibot.Site("wikidata", "wikidata")
+site: DataSite = pywikibot.Site("wikidata", "wikidata")
 
 EntityPage = Union[pywikibot.ItemPage, pywikibot.PropertyPage, pywikibot.LexemePage]
