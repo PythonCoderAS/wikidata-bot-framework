@@ -27,13 +27,10 @@ jobs:
       - name: Install dependencies
         run: pipenv sync --dev
 
-      - name: Add secret files
-        run: |
-          echo "$USER_CONFIG" > user-config.py
-          echo "$USER_PASSWORD" > user-password.py
+      - name: Add password
+        run: echo "$USER_PASSWORD" > user-password.py
         env:
-          USER_CONFIG: ${{ secrets.USER_CONFIG }}
           USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
 
       - name: Test
-        run: pipenv run test
+        run: pipenv run test --simulate
