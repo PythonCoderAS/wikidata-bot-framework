@@ -1,4 +1,4 @@
-name: Lint
+name: Test
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: ["master"]
 
 jobs:
-  lint:
+  format:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,5 +27,13 @@ jobs:
       - name: Install dependencies
         run: pipenv sync --dev
 
-      - name: Lint
-        run: pipenv run lint-ci
+      - name: Add secret files
+        run: |
+          echo "$USER_CONFIG" > user_config.py
+          echo "$USER_PASSWORD" > user_password.py
+        env:
+          USER_CONFIG: ${{ secrets.USER_CONFIG }}
+          USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
+
+      - name: Test
+        run: pipenv run test

@@ -2,10 +2,9 @@ name: Format
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
-
+    branches: ["master"]
 
 jobs:
   format:
@@ -18,7 +17,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install pipenv
         run: |

@@ -1,0 +1,23 @@
+{
+  "name": "wikidata-bot-framework",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Linting tools for wikidata-bot-framework",
+  "scripts": {
+    "lint": "prettier --write .",
+    "lint:check": "prettier --check ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PythonCoderAS/wikidata-bot-framework.git"
+  },
+  "author": "PythonCoderAS",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PythonCoderAS/wikidata-bot-framework/issues"
+  },
+  "homepage": "https://github.com/PythonCoderAS/wikidata-bot-framework#readme",
+  "devDependencies": {
+    "prettier": "^3.2.4"
+  }
+}

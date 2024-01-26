@@ -16,6 +16,7 @@ sphinx-rtd-theme = "*"
 ruff = "*"
 pytest = "*"
 build = "*"
+pre-commit = "*"
 
 [scripts]
 make-dist = "bash -c 'rm -r dist 2>/dev/null; pyproject-build; twine upload dist/*'"
