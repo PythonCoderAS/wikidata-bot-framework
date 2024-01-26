@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wikidata-bot-framework"
-version = "7.2.0"
+version = "7.2.1"
 description = "A framework for making Wikidata bots."
 readme = "README.md"
 dependencies = [
-    "pywikibot",
+    "pywikibot<8.3.0",
     "mwparserfromhell",
     "python-dotenv",
     "sentry-sdk",
