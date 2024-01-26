@@ -51,7 +51,8 @@ from .utils import (
     append_to_source,  # noqa: F401
     merge_reference_groups,
     OutputHelper,  # noqa: F401
-    mark_claim_as_preferred,  # noqa: F401
+    mark_claim_as_preferred,
+    remove_qualifiers,  # noqa: F401
 )  # noqa: F401
 
 Output = Mapping[str, List[ExtraProperty]]
@@ -596,6 +597,7 @@ class PropertyAdderBot(ABC):
                             else:
                                 continue
                     extra_prop_data.sort_qualifiers()
+                    added_qualifiers = []
                     for (
                         qualifier_prop,
                         qualifiers,
@@ -609,6 +611,7 @@ class PropertyAdderBot(ABC):
                                 )
                             ):
                                 add_qualifier_locally(new_claim, qualifier)
+                                added_qualifiers.append(qualifier)
                                 re_cycle |= self.processed_hook(
                                     item,
                                     ProcessReason.missing_qualifier_property,
@@ -691,6 +694,14 @@ class PropertyAdderBot(ABC):
                                                 extra_prop_data.claim
                                             ) = original_claim
                                             add_claim_locally(item, new_claim)
+                                            for qualifier in added_qualifiers:
+                                                add_qualifier_locally(
+                                                    new_claim, qualifier
+                                                )
+                                            remove_qualifiers(
+                                                old_claim, added_qualifiers
+                                            )
+                                            added_qualifiers = []
                                             re_cycle |= self.processed_hook(
                                                 item,
                                                 ProcessReason.new_claim_from_qualifier,
@@ -705,6 +716,7 @@ class PropertyAdderBot(ABC):
                                         else:
                                             continue
                                     add_qualifier_locally(new_claim, qualifier)
+                                    added_qualifiers.append(qualifier)
                                     if not made_new_claim:
                                         re_cycle |= self.processed_hook(
                                             item,

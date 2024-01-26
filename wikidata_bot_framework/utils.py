@@ -1,7 +1,7 @@
 import secrets
 from collections import defaultdict
 from copy import copy
-from typing import Literal, Mapping, MutableMapping, Union, overload
+from typing import List, Literal, Mapping, MutableMapping, Union, overload
 
 import pywikibot
 
@@ -16,6 +16,11 @@ def add_claim_locally(item: pywikibot.ItemPage, claim: pywikibot.Claim):
 def add_qualifier_locally(claim: pywikibot.Claim, qualifier: pywikibot.Claim):
     qualifier.isQualifier = True
     claim.qualifiers.setdefault(qualifier.getID(), []).append(qualifier)
+
+def remove_qualifiers(claim: pywikibot.Claim, qualifiers: List[pywikibot.Claim]):
+    for qualifier in qualifiers:
+        if qualifier in claim.qualifiers.get(qualifier.getID(), []):
+            claim.qualifiers[qualifier.getID()].remove(qualifier)
 
 
 def add_reference_locally(claim: pywikibot.Claim, *reference: pywikibot.Claim):
