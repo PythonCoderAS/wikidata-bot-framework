@@ -29,8 +29,8 @@ jobs:
 
       - name: Add secret files
         run: |
-          echo "$USER_CONFIG" > user_config.py
-          echo "$USER_PASSWORD" > user_password.py
+          echo "$USER_CONFIG" > user-config.py
+          echo "$USER_PASSWORD" > user-password.py
         env:
           USER_CONFIG: ${{ secrets.USER_CONFIG }}
           USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
