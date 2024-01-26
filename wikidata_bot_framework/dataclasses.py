@@ -161,7 +161,7 @@ class ExtraReference:
             now = pywikibot.Timestamp.now(tz=datetime.timezone.utc)
             retrieved = pywikibot.WbTime(year=now.year, month=now.month, day=now.day)
         if retrieved:
-            retrieved_claim = pywikibot.Claim(site, retrieved_prop)
+            retrieved_claim = pywikibot.Claim(site, retrieved_prop, is_reference=True)
             retrieved_claim.setTarget(retrieved)
             self.new_reference_props[retrieved_prop] = retrieved_claim
 
