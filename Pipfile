@@ -20,8 +20,10 @@ build = "*"
 [scripts]
 make-dist = "bash -c 'rm -r dist 2>/dev/null; pyproject-build; twine upload dist/*'"
 test = "pytest"
-lint = "ruff check ."
+lint = "ruff check . --fix"
+lint-ci = "ruff check ."
 format = "ruff format ."
+format-ci = "ruff format . --check"
 
 [requires]
 python_version = "3.12"
