@@ -133,6 +133,9 @@ class ExtraQualifier(ClaimShortcutMixin):
     reference_only: bool = False
     """Do not add the qualifier, instead only use it for adding references."""
 
+    def __post_init__(self):
+        self.claim.isQualifier = True
+
 
 @dataclasses.dataclass
 class ExtraReference:
@@ -182,6 +185,10 @@ class ExtraReference:
                 if ref_claim.getTarget() == claim.getTarget():
                     return True
         return False
+
+    def set_reference(self):
+        for prop, claim in self.new_reference_props.items():
+            claim.isReference = True
 
 
 @dataclasses.dataclass
@@ -316,3 +323,6 @@ class ExtraProperty(ClaimShortcutMixin):
             list,
             sorted(self.qualifiers.items(), key=self._qualifier_sorter, reverse=True),
         )
+
+    def __post_init__(self):
+        self.claim.isQualifier = self.claim.isReference = False
