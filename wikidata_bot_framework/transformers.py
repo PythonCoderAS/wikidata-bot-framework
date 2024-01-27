@@ -35,8 +35,8 @@ def de_archivify_url_property(prop: ExtraProperty, deprecate: bool = True):
         prop.qualifiers[archive_date_prop].append(
             ExtraQualifier(archive_date, skip_if_conflicting_exists=True)
         )
-        depreicated_reason = pywikibot.Claim(site, deprecated_reason_prop)
-        depreicated_reason.setTarget(pywikibot.ItemPage(site, link_rot_id))
+        deprecated_reason = pywikibot.Claim(site, deprecated_reason_prop)
+        deprecated_reason.setTarget(pywikibot.ItemPage(site, link_rot_id))
         prop.qualifiers[deprecated_reason_prop].append(
-            ExtraQualifier(depreicated_reason, skip_if_conflicting_exists=True)
+            ExtraQualifier(deprecated_reason, skip_if_conflicting_exists=True)
         )
