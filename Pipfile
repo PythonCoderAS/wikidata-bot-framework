@@ -21,6 +21,7 @@ pytest-timeout = "*"
 mypy = "*"
 types-requests = "*"
 types-setuptools = "*"
+twine = "*"
 
 [scripts]
 make-dist = "bash -c 'rm -r dist 2>/dev/null; python3 -m build; twine upload dist/*'"
