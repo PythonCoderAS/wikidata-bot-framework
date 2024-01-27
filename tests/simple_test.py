@@ -1,15 +1,12 @@
 import pytest
 import pywikibot
-from wikidata_bot_framework import Output, PropertyAdderBot
+from wikidata_bot_framework import Output
 from wikidata_bot_framework.constants import EntityPage, retrieved_prop, site
 from wikidata_bot_framework.dataclasses import ExtraProperty
+from . import TestPAB, sandbox_item
 
 
-class SimpleTestBot(PropertyAdderBot):
-    def __init__(self, *, simulate: bool):
-        super().__init__()
-        self.__simulate = simulate
-
+class SimpleTestBot(TestPAB):
     def get_edit_summary(self, page: EntityPage) -> str:
         return "Testing wikidata-bot-framework"
 
@@ -19,7 +16,7 @@ class SimpleTestBot(PropertyAdderBot):
         return {retrieved_prop: [ExtraProperty(claim)]}
 
     def post_edit_process_hook(self, output: Output, item: EntityPage) -> None:
-        if not self.__simulate:
+        if not self.simulate:
             item.removeClaims(
                 output[retrieved_prop][0].claim,
                 summary=super().get_full_summary("Removing test claim"),
@@ -27,7 +24,7 @@ class SimpleTestBot(PropertyAdderBot):
             )
 
 
-def test_simple_test_bot(pytestconfig: pytest.Config, monkeypatch: pytest.MonkeyPatch):
+def test_simple_test_bot(pytestconfig: pytest.Config):
     bot = SimpleTestBot(simulate=pytestconfig.getoption("--simulate"))
-    monkeypatch.setattr("getpass.getpass", lambda *_, **__: "")
-    bot.act_on_item(pywikibot.ItemPage(site, "Q4115189"))
+    bot.act_on_item(sandbox_item)
+    assert True  # If we get here, it worked

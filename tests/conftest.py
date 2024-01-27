@@ -14,3 +14,8 @@ def pytest_addoption(parser: pytest.Parser):
 def pytest_configure(config: pytest.Config):
     if config.getoption("--simulate"):
         pywikibot.handle_args(["-simulate"])
+
+
+@pytest.fixture(autouse=True)
+def block_getpass(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr("getpass.getpass", lambda *_, **__: "")

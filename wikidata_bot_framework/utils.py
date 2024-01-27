@@ -309,10 +309,3 @@ def mark_claim_as_preferred(
                 del c.qualifiers[preferred_rank_reason_prop]
                 changed = True
     return changed
-
-
-class CycleRecursionError(RecursionError):
-    """Raised when no edits are being made but methods are still signalling that edits were made, indicating a cycle.
-
-    :versionadded: 7.4.0
-    """

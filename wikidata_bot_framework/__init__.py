@@ -53,7 +53,6 @@ from .utils import (
     OutputHelper,  # noqa: F401
     mark_claim_as_preferred,  # noqa: F401
     remove_qualifiers,  # noqa: F401
-    CycleRecursionError,  # noqa: F401
 )
 
 Output = Mapping[str, List[ExtraProperty]]
@@ -86,12 +85,14 @@ class Config:
     act_on_cycle: bool = False
     """If the bot should do something if it detects a cycle. If False, there is a chance the bot gets stuck in an infinite loop
 
-    :versionadded: 7.4.0
+    .. versionadded:: 7.4.0
+    .. deprecated:: 7.4.1
     """
     throw_on_no_edit_cycle: bool = True
     """If the bot should throw an exception if no edits were made to the item but a cycle is being signalled. If False, the loop will silently stop.
 
-    :versionadded: 7.4.0
+    .. versionadded:: 7.4.0
+    .. deprecated:: 7.4.1
     """
 
 
@@ -422,7 +423,8 @@ class PropertyAdderBot(ABC):
     ) -> bool:
         """Do processing whenever the item is modified. This method is called directly after the item is modified.
 
-        :versionadded: 5.8.0
+        .. versionadded:: 5.8.0
+
         :param item: The item that was modified.
         :param reason: The reason the item was modified.
         :param claim: The main claim that was added or is having qualifiers/references added, defaults to None
@@ -454,18 +456,7 @@ class PropertyAdderBot(ABC):
         """
         acted = False
         re_cycle = True
-        second_last_revision = None
-        last_revision = item.latest_revision_id
         while re_cycle:
-            if (
-                self.config.act_on_cycle
-                and re_cycle
-                and second_last_revision == last_revision
-            ):
-                if self.config.throw_on_no_edit_cycle:
-                    raise CycleRecursionError()
-                else:
-                    break
             re_cycle = False
             for property_id, extra_props in copy(output).items():
                 for extra_prop_data in extra_props.copy():
@@ -795,7 +786,7 @@ class PropertyAdderBot(ABC):
             op="post_output_process", description="Post Output Process Hook"
         ):
             if self.post_output_process_hook(output, item):
-                re_cycle |= self.processed_hook(item, ProcessReason.post_output)
+                self.processed_hook(item, ProcessReason.post_output)
                 if not acted:
                     acted = True
         if acted:
@@ -814,8 +805,6 @@ class PropertyAdderBot(ABC):
                                 ),
                                 bot=True,
                             )
-                            second_last_revision = last_revision
-                            last_revision = item.latest_revision_id
                             break
                         except pywikibot.exceptions.APIError as e:
                             retries -= 1
