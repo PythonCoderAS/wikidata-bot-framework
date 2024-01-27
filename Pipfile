@@ -18,14 +18,18 @@ pytest = "*"
 build = "*"
 pre-commit = "*"
 pytest-timeout = "*"
+mypy = "*"
+types-requests = "*"
+types-setuptools = "*"
 
 [scripts]
-make-dist = "bash -c 'rm -r dist 2>/dev/null; pyproject-build; twine upload dist/*'"
+make-dist = "bash -c 'rm -r dist 2>/dev/null; python3 -m build; twine upload dist/*'"
 test = "pytest"
 lint = "ruff check . --fix"
 lint-ci = "ruff check ."
 format = "ruff format ."
 format-ci = "ruff format . --check"
+typelint = "mypy ."
 
 [requires]
 python_version = "3.12"

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wikidata-bot-framework"
-version = "7.4.1"
+version = "7.4.2"
 description = "A framework for making Wikidata bots."
 readme = "README.md"
 dependencies = [
@@ -57,3 +57,11 @@ order-by-type = true
 
 [tool.ruff.format]
 docstring-code-format = true
+
+[tool.mypy]
+exclude = ["user-config.py", "user-password.py"]
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = ["pywikibot", "pywikibot.*"]
+ignore_missing_imports = true

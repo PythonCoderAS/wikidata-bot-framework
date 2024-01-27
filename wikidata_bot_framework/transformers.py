@@ -20,7 +20,7 @@ def de_archivify_url_property(prop: ExtraProperty, deprecate: bool = True):
         prop.claim.setTarget(full_url.replace(match.group(0), ""))
         if deprecate:
             prop.claim.setRank("deprecated")
-        timestamp = datetime.strptime(match.group(1), "%Y%m%d%H%M%S")
+        timestamp = datetime.datetime.strptime(match.group(1), "%Y%m%d%H%M%S")
         archive_url = pywikibot.Claim(site, archive_url_prop)
         archive_url.setTarget(full_url)
         prop.qualifiers[archive_url_prop].append(

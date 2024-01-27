@@ -761,7 +761,7 @@ class PropertyAdderBot(ABC):
                                         claim=extra_prop_data,
                                         reference=extra_reference,
                                         context=MergedReferenceContext(
-                                            existing_reference=existing_reference
+                                            existing_reference=existing_reference,
                                         ),
                                     )
                                     acted = True

@@ -1,7 +1,8 @@
+from abc import ABC
 import dataclasses
 import datetime
 from collections import defaultdict
-from typing import Any, Literal, Mapping, MutableMapping, Pattern, Union
+from typing import TYPE_CHECKING, Any, Literal, Mapping, MutableMapping, Pattern, Union
 
 import pywikibot
 from typing_extensions import Self
@@ -12,8 +13,13 @@ WikidataReference = MutableMapping[str, list[pywikibot.Claim]]
 PossibleValueType = Any
 
 
-class ClaimShortcutMixin:
+class ClaimShortcutMixin(ABC):
     """A mixin class for anything that takes a claim as the only required init argument."""
+
+    if TYPE_CHECKING:
+
+        def __init__(self, claim: pywikibot.Claim) -> None:
+            ...
 
     @classmethod
     def from_property_id_and_value(
@@ -124,7 +130,7 @@ class ExtraQualifier(ClaimShortcutMixin):
     replace_if_conflicting_exists: bool = False
     """If a qualifier with the same value already exists, replace it."""
     delete_other_if_replacing: bool = False
-    """If ``replace_if_conflicting_exists`` is True and there are multiple values for the same property, delete all 
+    """If ``replace_if_conflicting_exists`` is True and there are multiple values for the same property, delete all
     but the one being replaced."""
     skip_if_conflicting_language_exists: bool = False
     """If a qualifier with the same language already exists, don't add it."""

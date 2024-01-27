@@ -46,7 +46,7 @@ class ProcessReason(Enum):
 
     def claim_modified(self) -> bool:
         """Returns if the enum value means a claim was modified."""
-        return self.new_claim_was_added(self) or self in [
+        return self.new_claim_was_added() or self in [
             self.different_rank,
             self.replace_value,
             self.delete_values,
@@ -58,7 +58,7 @@ class ProcessReason(Enum):
 
     def qualifier_modified(self) -> bool:
         """Returns if the enum value means a qualifier was modified."""
-        return self.new_qualifier_was_added(self) or self in [
+        return self.new_qualifier_was_added() or self in [
             self.replace_qualifier_value,
             self.delete_qualifier_values,
         ]

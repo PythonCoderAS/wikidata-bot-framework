@@ -25,7 +25,7 @@ def load_sentry():
 @contextmanager
 def start_transaction(
     **kwargs,
-) -> Iterator[Union[sentry_sdk.tracing.Transaction, None]]:
+) -> Iterator[Union[sentry_sdk.tracing.Span, None]]:
     if sentry_avilable:
         with sentry_sdk.start_transaction(**kwargs) as transaction:
             yield transaction
@@ -50,3 +50,4 @@ def start_span(**kwargs) -> Iterator[Union[sentry_sdk.tracing.Span, None]]:
 def report_exception(*args, **kwargs) -> Union[str, None]:
     if sentry_avilable:
         return sentry_sdk.capture_exception(*args, **kwargs)
+    return None
