@@ -18,6 +18,8 @@ def load_sentry():
             _experiments={
                 "profiles_sample_rate": 1.0,
             },
+            ignore_errors=[KeyboardInterrupt],
+            attach_stacktrace=True,
         )
         sentry_avilable = True
 
