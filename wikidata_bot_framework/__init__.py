@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any, Iterable, List, Literal, Mapping, Optional, Union, overload
 
 import pywikibot
+from sentry_sdk import push_scope
 
 # Make all imports from submodules available here
 
@@ -822,7 +823,7 @@ class PropertyAdderBot(ABC):
         :param item: The item to act on.
         :return: If any edits were made to the item.
         """
-        with start_transaction(op="act_on_item", name="Process Item"):
+        with push_scope(), start_transaction(op="act_on_item", name="Process Item"):
             with start_span(op="get_output", description="Get Output"):
                 output = self.run_item(item)
             with start_span(op="process_output", description="Process Output"):
