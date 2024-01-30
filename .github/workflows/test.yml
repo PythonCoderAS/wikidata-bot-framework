@@ -34,6 +34,8 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    needs:
+      - build-versioned-deps
     strategy:
       matrix:
         python-version:
