@@ -67,4 +67,4 @@ jobs:
           USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
 
       - name: Test
-        run: pipenv run test --simulate
+        run: python -m pytest --simulate
