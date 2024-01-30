@@ -33,3 +33,4 @@ format-ci = "ruff format . --check"
 typelint = "mypy ."
 
 [requires]
+python_version = "3.12"
