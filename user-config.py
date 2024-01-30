@@ -3,7 +3,7 @@ import sys
 
 mylang = "wikidata"
 family = "wikidata"
-usernames = defaultdict(defaultdict)
+usernames: defaultdict[str, defaultdict[str, str]] = defaultdict(defaultdict)
 
 usernames[family][mylang] = "RPI2026F1Bot"
 
