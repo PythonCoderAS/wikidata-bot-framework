@@ -43,8 +43,9 @@ def merge_reference_groups(
 ) -> bool:
     acted = False
     for new_reference in new_references:
-        if new_reference.getID() not in reference_group:
-            reference_group.setdefault(new_reference.getID(), []).append(new_reference)
+        new_reference_id: str = new_reference.getID(False)  # type: ignore
+        if new_reference not in reference_group:
+            reference_group.setdefault(new_reference_id, []).append(new_reference)
             acted = True
     return acted
 
@@ -56,7 +57,8 @@ class OutputHelper(
         super().__init__(list)
 
     def add_property(self, prop: ExtraProperty):
-        self[prop.claim.getID()].append(prop)
+        prop_id: str = prop.claim.getID(False)  # type: ignore
+        self[prop_id].append(prop)
 
     def add_properties(self, props: list[ExtraProperty]):
         for prop in props:
@@ -156,18 +158,17 @@ class OutputHelper(
 def get_sparql_query(
     property_val: str,
     *,
-    multiple_or=True,
-    or_return_value=False,
     filter_out_unknown_value: bool = True,
-) -> dict[str, set[str]]:
+) -> Mapping[str, set[str]]:
     ...
 
 
 @overload
 def get_sparql_query(
+    property_val: str,
     *property_values: str,
-    multiple_or: Literal[True] = True,
-    or_return_value: Literal[False] = False,
+    multiple_or: Literal[True],
+    or_return_value: Literal[False],
     filter_out_unknown_value: bool = True,
 ) -> set[str]:
     ...
@@ -175,30 +176,33 @@ def get_sparql_query(
 
 @overload
 def get_sparql_query(
+    property_val: str,
     *property_values: str,
-    multiple_or: Literal[True] = True,
-    or_return_value: Literal[True] = True,
+    multiple_or: Literal[True],
+    or_return_value: Literal[True],
     filter_out_unknown_value: bool = True,
-) -> dict[str, dict[str, set[str]]]:
+) -> Mapping[str, Mapping[str, set[str]]]:
     ...
 
 
 @overload
 def get_sparql_query(
+    property_val: str,
     *property_values: str,
-    multiple_or: Literal[False] = False,
+    multiple_or: Literal[False],
     or_return_value: bool = True,
     filter_out_unknown_value: bool = True,
-) -> dict[str, dict[str, set[str]]]:
+) -> Mapping[str, Mapping[str, set[str]]]:
     ...
 
 
 def get_sparql_query(
+    property_val: str,
     *property_values: str,
-    multiple_or=True,
-    or_return_value=False,
+    multiple_or: bool = True,
+    or_return_value: bool = False,
     filter_out_unknown_value: bool = True,
-):
+) -> Union[set[str], Mapping[str, Mapping[str, set[str]]], Mapping[str, set[str]]]:
     """Get the requests of a SPARQL query.
 
     :param property_values: The properties to query.
@@ -206,6 +210,7 @@ def get_sparql_query(
     :param or_return_value: When multiple_or is True, return the values. Defaults to False.
     :param filter_out_unknown_value: Whether to filter out unknown/no values. Defaults to True.
     """
+    property_values = (property_val,) + property_values
     if len(property_values) == 0:
         raise ValueError("No property values specified.")
     elif len(property_values) == 1:
@@ -240,28 +245,30 @@ def get_sparql_query(
             item["item"]["value"].split("/")[-1] for item in data["results"]["bindings"]
         }
     elif len(property_values) == 1:
-        retval = defaultdict(set)
+        retval1 = defaultdict(set)
         for item in data["results"]["bindings"]:
             if filter_out_unknown_value and ".well-known" in str(
                 item[f"prop{property_values[0]}"]["value"]
             ):
                 continue
-            retval[item["item"]["value"].split("/")[-1]].add(
+            retval1[item["item"]["value"].split("/")[-1]].add(
                 item[f"prop{property_values[0]}"]["value"]
             )
-        return dict(retval)
+        return dict(retval1)
     else:
-        retval = defaultdict(lambda: defaultdict(set))
+        retval2: defaultdict[str, defaultdict[str, set[str]]] = defaultdict(
+            lambda: defaultdict(set)
+        )
         for item in data["results"]["bindings"]:
             for prop in property_values:
                 if filter_out_unknown_value and ".well-known" in str(
                     item[f"prop{prop}"]["value"]
                 ):
                     continue
-                retval[item["item"]["value"].split("/")[-1]][prop].add(
+                retval2[item["item"]["value"].split("/")[-1]][prop].add(
                     item[f"prop{prop}"]["value"]
                 )
-        return dict(retval)
+        return dict(retval2)
 
 
 def get_random_hex(num_chars: int = 32):

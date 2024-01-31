@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from copy import copy
 from dataclasses import dataclass, field
 from json import dumps
-from typing import Any, Iterable, List, Literal, Mapping, Optional, Union, overload
+from typing import Iterable, List, Literal, Mapping, Optional, Union, overload
 
 import pywikibot
 from sentry_sdk import push_scope
@@ -259,9 +259,10 @@ class PropertyAdderBot(ABC):
         :return: If the reference is whitelisted.
         """
         if self.config.create_or_edit_references_for_main_property_whitelist_enabled:
-            if (
-                reference.claim.getID()
+            if any(
+                claim.getID(False)
                 in self.config.create_or_edit_references_for_main_property_whitelist
+                for claim in reference.new_reference_props.values()
             ):
                 return True
             return False
@@ -274,9 +275,6 @@ class PropertyAdderBot(ABC):
         reason: Literal[ProcessReason.missing_property, ProcessReason.missing_value],
         *,
         claim: ExtraProperty,
-        qualifier: None = None,
-        reference: None = None,
-        context: None = None,
     ) -> bool:
         ...
 
@@ -287,8 +285,6 @@ class PropertyAdderBot(ABC):
         reason: Literal[ProcessReason.different_rank],
         *,
         claim: ExtraProperty,
-        qualifier: None = None,
-        reference: None = None,
         context: DifferentRankContext,
     ) -> bool:
         ...
@@ -300,8 +296,6 @@ class PropertyAdderBot(ABC):
         reason: Literal[ProcessReason.replace_value],
         *,
         claim: ExtraProperty,
-        qualifier: None = None,
-        reference: None = None,
         context: ReplaceValueContext,
     ) -> bool:
         ...
@@ -313,8 +307,6 @@ class PropertyAdderBot(ABC):
         reason: Literal[ProcessReason.delete_values],
         *,
         claim: ExtraProperty,
-        qualifier: None = None,
-        reference: None = None,
         context: DeleteValuesContext,
     ) -> bool:
         ...
@@ -330,8 +322,6 @@ class PropertyAdderBot(ABC):
         *,
         claim: ExtraProperty,
         qualifier: ExtraQualifier,
-        reference: None = None,
-        context: None = None,
     ):
         ...
 
@@ -343,7 +333,6 @@ class PropertyAdderBot(ABC):
         *,
         claim: ExtraProperty,
         qualifier: ExtraQualifier,
-        reference: None = None,
         context: ReplaceQualifierValueContext,
     ) -> bool:
         ...
@@ -356,7 +345,6 @@ class PropertyAdderBot(ABC):
         *,
         claim: ExtraProperty,
         qualifier: ExtraQualifier,
-        reference: None = None,
         context: DeleteQualifierValuesContext,
     ) -> bool:
         ...
@@ -369,7 +357,6 @@ class PropertyAdderBot(ABC):
         *,
         claim: ExtraProperty,
         qualifier: ExtraQualifier,
-        reference: None = None,
         context: NewClaimFromQualifierContext,
     ) -> bool:
         ...
@@ -381,9 +368,7 @@ class PropertyAdderBot(ABC):
         reason: Literal[ProcessReason.missing_reference],
         *,
         claim: ExtraProperty,
-        qualifier: None = None,
         reference: ExtraReference,
-        context: None = None,
     ) -> bool:
         ...
 
@@ -394,7 +379,6 @@ class PropertyAdderBot(ABC):
         reason: Literal[ProcessReason.merged_reference],
         *,
         claim: ExtraProperty,
-        qualifier: None = None,
         reference: ExtraReference,
         context: MergedReferenceContext,
     ) -> bool:
@@ -405,23 +389,17 @@ class PropertyAdderBot(ABC):
         self,
         item: EntityPage,
         reason: Literal[ProcessReason.post_output],
-        *,
-        claim: None = None,
-        qualifier: None = None,
-        reference: None = None,
-        context: None = None,
     ) -> bool:
         ...
 
-    def processed_hook(
+    def processed_hook(  # type: ignore[misc]
         self,
-        item: EntityPage,
-        reason: ProcessReason,
+        item: ProcessReason,
         *,
         claim: Optional[ExtraProperty] = None,
         qualifier: Optional[ExtraQualifier] = None,
         reference: Optional[ExtraReference] = None,
-        context: Optional[dict[str, Any]] = None,
+        context: Optional[dict] = None,
     ) -> bool:
         """Do processing whenever the item is modified. This method is called directly after the item is modified.
 
@@ -456,6 +434,7 @@ class PropertyAdderBot(ABC):
         :param item: The item to process
         :return: If any edits were made to the item.
         """
+        assert isinstance(item, pywikibot.ItemPage)
         acted = False
         re_cycle = True
         # This is an (inefficient) way to prevent cycles. If an actual change is made, the hash will change.
@@ -487,7 +466,7 @@ class PropertyAdderBot(ABC):
                             continue
                     else:
                         for existing_claim in item.claims[property_id].copy():
-                            existing_claim: pywikibot.Claim
+                            assert isinstance(existing_claim, pywikibot.Claim)
                             if self.same_main_property(existing_claim, new_claim, item):
                                 # This is triggered if there is a statement for the property exactly matching the one we want to add
                                 if new_claim.getRank() != existing_claim.getRank():
@@ -519,6 +498,7 @@ class PropertyAdderBot(ABC):
                                     old_value = existing_claim.getTarget()
                                     existing_claim.setTarget(new_claim.getTarget())
                                     if new_claim.getRank() != existing_claim.getRank():
+                                        old_rank = existing_claim.getRank()
                                         existing_claim.rank = new_claim.getRank()
                                         re_cycle |= self.processed_hook(
                                             item,
@@ -526,7 +506,7 @@ class PropertyAdderBot(ABC):
                                             claim=extra_prop_data,
                                             context=DifferentRankContext(
                                                 existing_claim=existing_claim,
-                                                old_value=old_value,
+                                                old_rank=old_rank,
                                             ),
                                         )
                                     original_new_claim = new_claim
@@ -566,8 +546,8 @@ class PropertyAdderBot(ABC):
                                 and property_id in item.claims
                             ):  # type: ignore
                                 found_conflicting_language = False
-                                for existing_claim in item.claims[property_id]:  # type: ignore
-                                    existing_claim: pywikibot.Claim
+                                for existing_claim in item.claims[property_id]:
+                                    assert isinstance(existing_claim, pywikibot.Claim)
                                     if isinstance(
                                         existing_claim.getTarget(),
                                         pywikibot.WbMonolingualText,
@@ -577,7 +557,7 @@ class PropertyAdderBot(ABC):
                                         )  # type: ignore
                                         if (
                                             lang_target.language
-                                            == new_claim.getTarget().language
+                                            == new_claim.getTarget().language  # type: ignore
                                             and lang_target != new_claim.getTarget()
                                         ):  # type: ignore
                                             found_conflicting_language = True
@@ -626,7 +606,7 @@ class PropertyAdderBot(ABC):
                             if not new_claim.qualifiers.get(qualifier_prop, []) and (
                                 self.whitelisted_claim(extra_prop_data)
                                 or self.whitelisted_qualifier(
-                                    extra_prop_data, qualifier
+                                    extra_prop_data, qualifier_data
                                 )
                             ):
                                 add_qualifier_locally(new_claim, qualifier)
@@ -652,7 +632,7 @@ class PropertyAdderBot(ABC):
                                             and (
                                                 self.whitelisted_claim(extra_prop_data)
                                                 or self.whitelisted_qualifier(
-                                                    extra_prop_data, qualifier
+                                                    extra_prop_data, qualifier_data
                                                 )
                                             )
                                         ):
@@ -691,7 +671,7 @@ class PropertyAdderBot(ABC):
                                                     claim=extra_prop_data,
                                                     qualifier=qualifier_data,
                                                     context=DeleteQualifierValuesContext(
-                                                        deleted_claims=deleted
+                                                        deleted_qualifiers=deleted
                                                     ),
                                                 )
                                                 new_claim.qualifiers[qualifier_prop] = [
@@ -766,7 +746,7 @@ class PropertyAdderBot(ABC):
                                         claim=extra_prop_data,
                                         reference=extra_reference,
                                         context=MergedReferenceContext(
-                                            existing_reference=existing_reference,
+                                            old_reference_group=existing_reference,
                                         ),
                                     )
                                     acted = True

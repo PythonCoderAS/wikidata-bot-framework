@@ -174,9 +174,10 @@ class ExtraReference:
     def add_claim(
         self, claim: pywikibot.Claim, also_match_property_values: bool = False
     ):
+        claim_id: str = claim.getID(False)  # type: ignore
         if also_match_property_values:
-            self.match_property_values[claim.getID()] = claim
-        self.new_reference_props[claim.getID()] = claim
+            self.match_property_values[claim_id] = claim
+        self.new_reference_props[claim_id] = claim
 
     def is_compatible_reference(self, reference: WikidataReference) -> bool:
         if self.url_match_pattern and url_prop in reference:
@@ -222,7 +223,7 @@ class ExtraProperty(ClaimShortcutMixin):
 
         :param qualifier: The qualifier to add.
         """
-        self.qualifiers[qualifier.claim.getID()].append(qualifier)
+        self.qualifiers[qualifier.claim.getID(False)].append(qualifier)  # type: ignore
 
     def add_qualifiers(self, qualifiers: list[ExtraQualifier]):
         """Add qualifiers to the claim.
