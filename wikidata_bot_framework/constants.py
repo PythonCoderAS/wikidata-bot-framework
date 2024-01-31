@@ -23,6 +23,6 @@ deprecated_reason_prop = "P2241"
 link_rot_id = "Q1193907"
 preferred_rank_reason_prop = "P7452"
 
-site: DataSite = pywikibot.Site("wikidata", "wikidata")
+site: DataSite = pywikibot.Site("wikidata", "wikidata")  # type: ignore
 
 EntityPage = Union[pywikibot.ItemPage, pywikibot.PropertyPage, pywikibot.LexemePage]

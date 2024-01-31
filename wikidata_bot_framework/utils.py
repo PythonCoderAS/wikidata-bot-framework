@@ -1,7 +1,7 @@
 import secrets
 from collections import defaultdict
 from copy import copy
-from typing import List, Literal, Mapping, MutableMapping, Union, overload
+from typing import Iterable, List, Literal, Mapping, MutableMapping, Union, overload
 
 import pywikibot
 
@@ -316,3 +316,53 @@ def mark_claim_as_preferred(
                 del c.qualifiers[preferred_rank_reason_prop]
                 changed = True
     return changed
+
+
+def resolve_multiple_property_claims(
+    query_values: Mapping[str, set[str]],
+) -> Mapping[tuple[str, str], str]:
+    """Get the items for multiple different claims.
+
+    For example, if you want to know if any items have PXXX=QYYY, or any items that have PAAA=QBBB, this function will return any items that match either of those claims.
+
+    This is useful for doing multiple resolutions really fast.
+
+    Precondition: The property IDs in query_values must be external IDs. Any other type may not work.
+
+    :param query_values: The mapping of property IDs and values to search for
+    :return: A Mapping where the key is a tuple consisting of a property ID and a given value, and the value is the item ID.
+    """
+    flattened_values: list[tuple[str, str]] = []
+    for prop, values in query_values.items():
+        flattened_values.extend([(prop, value) for value in values])
+    props: Iterable[str] = query_values.keys()
+    template_string = (
+        '{ ?item wdt:%(prop)s "%(value)s" . ?item wdt:%(prop)s ?val%(prop)s . }'
+    )
+    filled = [
+        template_string % {"prop": prop, "value": value}
+        for prop, value in flattened_values
+    ]
+    query_variables = "?item " + " ".join(f"?val{prop}" for prop in props)
+    query_string = (
+        "SELECT DISTINCT "
+        + query_variables
+        + " WHERE { "
+        + " UNION ".join(filled)
+        + " }"
+    )
+    r = session.get(
+        "https://query.wikidata.org/sparql",
+        params={"query": query_string},
+        headers={"Accept": "application/sparql-results+json;charset=utf-8"},
+    )
+    r.raise_for_status()
+    data = r.json()
+    retval = {}
+    for item in data["results"]["bindings"]:
+        valKey = next(key for key in item.keys() if key.startswith("val"))
+        propID = valKey[3:]
+        propValue = item[valKey]["value"]
+        itemValue = item["item"]["value"]
+        retval[(propID, propValue)] = itemValue
+    return retval

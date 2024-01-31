@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from copy import copy
 from dataclasses import dataclass, field
 from json import dumps
-from typing import Iterable, List, Literal, Mapping, Optional, Union, overload
+from typing import Any, Iterable, List, Literal, Mapping, Optional, Union, overload
 
 import pywikibot
 from sentry_sdk import push_scope
@@ -55,6 +55,7 @@ from .utils import (
     OutputHelper,  # noqa: F401
     mark_claim_as_preferred,  # noqa: F401
     remove_qualifiers,  # noqa: F401
+    resolve_multiple_property_claims,  # noqa: F401
 )
 
 Output = Mapping[str, List[ExtraProperty]]
@@ -392,14 +393,15 @@ class PropertyAdderBot(ABC):
     ) -> bool:
         ...
 
-    def processed_hook(  # type: ignore[misc]
+    def processed_hook(
         self,
-        item: ProcessReason,
+        item: EntityPage,
+        reason: ProcessReason,
         *,
         claim: Optional[ExtraProperty] = None,
         qualifier: Optional[ExtraQualifier] = None,
         reference: Optional[ExtraReference] = None,
-        context: Optional[dict] = None,
+        context: Optional[Mapping[str, Any]] = None,
     ) -> bool:
         """Do processing whenever the item is modified. This method is called directly after the item is modified.
 
@@ -458,7 +460,7 @@ class PropertyAdderBot(ABC):
                             add_claim_locally(item, new_claim)
                             re_cycle |= self.processed_hook(
                                 item,
-                                ProcessReason.missing_property,
+                                reason=ProcessReason.missing_property,
                                 claim=extra_prop_data,
                             )
                             acted = True

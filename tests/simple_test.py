@@ -25,6 +25,6 @@ class SimpleTestBot(TestPAB):
 
 
 def test_simple_test_bot(pytestconfig: pytest.Config):
-    bot = SimpleTestBot(simulate=pytestconfig.getoption("--simulate"))
+    bot = SimpleTestBot(simulate=pytestconfig.getoption("--simulate"))  # type: ignore
     bot.act_on_item(sandbox_item)
     assert True  # If we get here, it worked
