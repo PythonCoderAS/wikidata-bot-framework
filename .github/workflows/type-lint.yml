@@ -83,3 +83,4 @@ jobs:
         uses: jakebailey/pyright-action@v2
         with:
           pylance-version: ${{ matrix.pylance-version }}
+          warnings: true
