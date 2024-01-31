@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from copy import copy
 from dataclasses import dataclass, field
+from json import dumps
 from typing import Any, Iterable, List, Literal, Mapping, Optional, Union, overload
 
 import pywikibot
@@ -457,7 +458,10 @@ class PropertyAdderBot(ABC):
         """
         acted = False
         re_cycle = True
-        while re_cycle:
+        # This is an (inefficient) way to prevent cycles. If an actual change is made, the hash will change.
+        second_previous_hash = None
+        previous_hash = hash(dumps(item.toJSON()))
+        while re_cycle and second_previous_hash != previous_hash:
             re_cycle = False
             for property_id, extra_props in copy(output).items():
                 for extra_prop_data in extra_props.copy():
@@ -783,6 +787,8 @@ class PropertyAdderBot(ABC):
                                 new_claim, *extra_reference.new_reference_props.values()
                             )
                             acted = True
+            second_previous_hash = previous_hash
+            previous_hash = hash(dumps(item.toJSON()))
         with start_span(
             op="post_output_process", description="Post Output Process Hook"
         ):
