@@ -103,4 +103,4 @@ class NewClaimFromQualifierContext(TypedDict):
 
 class MergedReferenceContext(TypedDict):
     old_reference_group: WikidataReference
-    """Note: Until T328811 is resolved, if a claim's value is replaced (not likely) then the new value will be in the old reference group."""
+    """.. note:: Until T328811 is resolved, if a claim's value is replaced (not likely) then the new value will be in the old reference group."""

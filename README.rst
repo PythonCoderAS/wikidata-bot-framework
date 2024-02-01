@@ -1,5 +1,5 @@
-Welcome to wikidata-bot-framework's documentation!
-==================================================
+wikidata-bot-framework
+======================
 
 .. image:: https://img.shields.io/pypi/v/wikidata-bot-framework
    :alt: PyPI - Version
@@ -41,20 +41,4 @@ It will automatically add claims, qualifiers, and references and intelligently m
 It also allows you to manually edit the item if you need to remove claims.
 The framework also has many hooks that are called in various parts of the processing pipeline, for even more customizability.
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-   quickstart
-   property_adder_bot
-   extra_property
-   other
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+Read full docs at https://pythoncoderas.github.io/wikidata-bot-framework/.

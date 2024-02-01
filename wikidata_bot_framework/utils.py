@@ -2,6 +2,7 @@ import secrets
 from collections import defaultdict
 from copy import copy
 from typing import Iterable, List, Literal, Mapping, MutableMapping, Union, overload
+from typing_extensions import Self
 
 import pywikibot
 
@@ -64,15 +65,15 @@ class OutputHelper(
         for prop in props:
             self.add_property(prop)
 
-    def __copy__(self) -> "OutputHelper":
-        oh = OutputHelper()
+    def __copy__(self) -> Self:
+        oh = type(self)()
         oh.update(self)
         return oh
 
-    def __deepcopy__(self, memo) -> "OutputHelper":
+    def __deepcopy__(self, memo) -> Self:
         raise NotImplementedError("OutputHelper cannot be deepcopied.")
 
-    def copy(self) -> "OutputHelper":
+    def copy(self) -> Self:
         return copy(self)
 
     def add_property_from_property_id_and_value(
