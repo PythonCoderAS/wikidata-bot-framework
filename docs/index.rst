@@ -25,6 +25,10 @@ Welcome to wikidata-bot-framework's documentation!
    :alt: GitHub Actions test status
    :target: https://github.com/PythonCoderAS/wikidata-bot-framework/actions/workflows/test.yml
 
+.. image:: https://coveralls.io/repos/github/PythonCoderAS/wikidata-bot-framework/badge.svg?branch=master
+   :alt: Coverage Status
+   :target: https://coveralls.io/github/PythonCoderAS/wikidata-bot-framework?branch=master
+
 .. image:: https://github.com/PythonCoderAS/wikidata-bot-framework/actions/workflows/type-lint.yml/badge.svg
    :alt: GitHub Actions type-lint status
    :target: https://github.com/PythonCoderAS/wikidata-bot-framework/actions/workflows/type-lint.yml
