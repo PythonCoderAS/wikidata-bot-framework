@@ -100,6 +100,5 @@ jobs:
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          flag-name: cov-finish
-          parallel: true
           parallel-finished: true
+          carryforward: "py-3.9,py-3.10,py-3.11,py-3.12"
