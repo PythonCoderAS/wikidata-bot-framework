@@ -68,3 +68,38 @@ jobs:
 
       - name: Test
         run: python -m pytest --simulate
+
+      - name: Upload coverage
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          flag-name: py-${{ matrix.python-version }}
+          parallel: true
+
+  coverage-finish:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: requirements.txt
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Upload coverage
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          flag-name: cov-finish
+          parallel: true
+          parallel-finished: true
