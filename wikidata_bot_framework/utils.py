@@ -321,7 +321,7 @@ def mark_claim_as_preferred(
 
 def resolve_multiple_property_claims(
     query_values: Mapping[str, set[str]],
-) -> Mapping[tuple[str, str], str]:
+) -> Mapping[tuple[str, str], set[str]]:
     """Get the items for multiple different claims.
 
     For example, if you want to know if any items have PXXX=QYYY, or any items that have PAAA=QBBB, this function will return any items that match either of those claims.
@@ -331,7 +331,7 @@ def resolve_multiple_property_claims(
     Precondition: The property IDs in query_values must be external IDs. Any other type may not work.
 
     :param query_values: The mapping of property IDs and values to search for
-    :return: A Mapping where the key is a tuple consisting of a property ID and a given value, and the value is the item ID.
+    :return: A Mapping where the key is a tuple consisting of a property ID and a given value, and the value is a set of matching item IDs.
     """
     flattened_values: list[tuple[str, str]] = []
     for prop, values in query_values.items():
@@ -359,11 +359,11 @@ def resolve_multiple_property_claims(
     )
     r.raise_for_status()
     data = r.json()
-    retval = {}
+    retval: defaultdict[tuple[str, str], set[str]] = defaultdict(set)
     for item in data["results"]["bindings"]:
         valKey = next(key for key in item.keys() if key.startswith("val"))
         propID = valKey[3:]
         propValue = item[valKey]["value"]
         itemValue = item["item"]["value"]
-        retval[(propID, propValue)] = itemValue
+        retval[(propID, propValue)].add(itemValue)
     return retval
