@@ -1,3 +1,4 @@
+import re
 import secrets
 from collections import defaultdict
 from copy import copy
@@ -8,6 +9,10 @@ import pywikibot
 
 from .constants import session, preferred_rank_reason_prop, site
 from .dataclasses import ExtraProperty, PossibleValueType
+
+entity_url_regex = re.compile(
+    r"^https?://(?:www\.)?wikidata\.org/entity/(Q|P|L)(\d+)$", re.IGNORECASE
+)
 
 
 def add_claim_locally(item: pywikibot.ItemPage, claim: pywikibot.Claim):
@@ -367,3 +372,13 @@ def resolve_multiple_property_claims(
         itemValue = item["item"]["value"]
         retval[(propID, propValue)].add(itemValue)
     return retval
+
+
+def get_entity_id_from_entity_url(entity_url: str) -> str:
+    """Get the entity ID from an entity URL.
+
+    :param entity_url: The entity URL.
+    :return: The entity ID.
+    """
+    assert entity_url_regex.match(entity_url), "Invalid entity URL"
+    return entity_url.split("/")[-1]

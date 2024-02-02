@@ -56,6 +56,7 @@ from .utils import (
     mark_claim_as_preferred,  # noqa: F401
     remove_qualifiers,  # noqa: F401
     resolve_multiple_property_claims,  # noqa: F401
+    get_entity_id_from_entity_url,  # noqa: F401
 )
 
 Output = Mapping[str, List[ExtraProperty]]
