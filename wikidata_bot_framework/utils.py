@@ -234,9 +234,9 @@ def get_sparql_query(
             "{" + f"?item wdt:{prop} ?_ ." + "}" for prop in property_values
         )
     query += "\n}"
-    r = session.get(
+    r = session.post(
         "https://query.wikidata.org/sparql",
-        params={"query": query},
+        data={"query": query},
         headers={"Accept": "application/sparql-results+json;charset=utf-8"},
     )
     r.raise_for_status()
@@ -352,9 +352,9 @@ def resolve_multiple_property_claims(
         + " UNION ".join(filled)
         + " }"
     )
-    r = session.get(
+    r = session.post(
         "https://query.wikidata.org/sparql",
-        params={"query": query_string},
+        data={"query": query_string},
         headers={"Accept": "application/sparql-results+json;charset=utf-8"},
     )
     r.raise_for_status()
