@@ -26,6 +26,7 @@ pytest-cov = "*"
 sphinxext-opengraph = "*"
 sphinx-copybutton = "*"
 myst-parser = "*"
+sphinx-lint = "*"
 
 [scripts]
 make-dist = "bash -c 'rm -r dist 2>/dev/null; python3 -m build; twine upload dist/*'"
@@ -35,6 +36,7 @@ lint-ci = "ruff check ."
 format = "ruff format ."
 format-ci = "ruff format . --check"
 typelint = "mypy ."
+docs-lint = "sphinx-lint docs"
 
 [requires]
 python_version = "3.12"

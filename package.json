@@ -6,9 +6,13 @@
   "scripts": {
     "lint": "prettier --write .",
     "lint:check": "prettier --check .",
-    "pyright": "pyright --warnings"
+    "pyright": "pyright --warnings",
+    "mdlint": "markdownlint --fix docs",
+    "mdlint:check": "markdownlint --fix --output docs"
   },
   "devDependencies": {
+    "markdownlint": "^0.33.0",
+    "markdownlint-cli": "^0.39.0",
     "prettier": "^3.2.4",
     "pyright": "^1.1.349"
   }

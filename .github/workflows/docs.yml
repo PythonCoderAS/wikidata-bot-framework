@@ -5,8 +5,8 @@ on:
   push:
     branches: ["master"]
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+  pull_request:
+    branches: ["master"]
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -20,12 +20,35 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Single deploy job since we're just deploying
-  deploy:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pipenv"
+      - name: Install pipenv
+        run: |
+          pip install --upgrade pip
+          pip install pipenv
+
+      - name: Install dependencies
+        run: pipenv sync --dev
+
+      - name: Lint
+        run: pipenv run docs-lint
+  build-and-deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    needs: lint
     steps:
       - name: Checkout
         uses: actions/checkout@v4

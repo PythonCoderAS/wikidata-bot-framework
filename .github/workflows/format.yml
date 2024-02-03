@@ -7,7 +7,7 @@ on:
     branches: ["master"]
 
 jobs:
-  format:
+  format-ruff:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,3 +29,21 @@ jobs:
 
       - name: Format
         run: pipenv run format-ci
+  format-prettier:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install
+        run: npm ci --dev
+
+      - name: Check
+        run: npm run lint:check
