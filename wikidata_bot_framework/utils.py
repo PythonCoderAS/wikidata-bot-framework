@@ -7,7 +7,7 @@ from typing_extensions import Self
 
 import pywikibot
 
-from .constants import session, preferred_rank_reason_prop, site
+from .constants import EntityPage, session, preferred_rank_reason_prop, site
 from .dataclasses import ExtraProperty, PossibleValueType
 
 entity_url_regex = re.compile(
@@ -15,7 +15,7 @@ entity_url_regex = re.compile(
 )
 
 
-def add_claim_locally(item: pywikibot.ItemPage, claim: pywikibot.Claim):
+def add_claim_locally(item: EntityPage, claim: pywikibot.Claim):
     item.claims.setdefault(claim.getID(), []).append(claim)
 
 

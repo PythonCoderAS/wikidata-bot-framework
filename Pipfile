@@ -12,7 +12,7 @@ typing-extensions = "*"
 
 [dev-packages]
 sphinx = "*"
-sphinx-rtd-theme = "*"
+furo = "*"
 ruff = "*"
 pytest = "*"
 build = "*"
@@ -23,6 +23,9 @@ types-requests = "*"
 types-setuptools = "*"
 twine = "*"
 pytest-cov = "*"
+sphinxext-opengraph = "*"
+sphinx-copybutton = "*"
+myst-parser = "*"
 
 [scripts]
 make-dist = "bash -c 'rm -r dist 2>/dev/null; python3 -m build; twine upload dist/*'"

@@ -437,7 +437,6 @@ class PropertyAdderBot(ABC):
         :param item: The item to process
         :return: If any edits were made to the item.
         """
-        assert isinstance(item, pywikibot.ItemPage)
         acted = False
         re_cycle = True
         # This is an (inefficient) way to prevent cycles. If an actual change is made, the hash will change.

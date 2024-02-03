@@ -22,7 +22,9 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.githubpages",
     "sphinx.ext.viewcode",
-    "sphinx_rtd_theme",
+    "sphinx_copybutton",
+    "sphinxext.opengraph",
+    "myst_parser",
 ]
 
 intersphinx_mapping = {
@@ -33,9 +35,13 @@ intersphinx_mapping = {
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
+myst_enable_extensions = [
+    "colon_fence",
+    "deflist",
+]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "sphinx_rtd_theme"
+html_theme = "furo"
 html_static_path = ["_static"]

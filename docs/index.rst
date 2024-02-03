@@ -1,5 +1,5 @@
-Welcome to wikidata-bot-framework's documentation!
-==================================================
+wikidata-bot-framework: Powerful framework for creating bots that edit Wikidata.
+================================================================================
 
 .. image:: https://img.shields.io/pypi/v/wikidata-bot-framework
    :alt: PyPI - Version
@@ -47,18 +47,20 @@ The framework also has many hooks that are called in various parts of the proces
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: High Level Overview:
+   :hidden:
 
-   quickstart
-   property_adder_bot
-   extra_property
-   other
+   high-level/quickstart
+   high-level/basic
+   high-level/configuration
+   high-level/error-handling
+   high-level/utils
+   high-level/processing-pipeline
 
+.. toctree::
+   :maxdepth: 2
+   :caption: API Reference
+   :hidden:
+   :glob:
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   api/*
