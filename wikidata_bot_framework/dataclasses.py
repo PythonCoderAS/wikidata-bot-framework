@@ -17,6 +17,7 @@ class ClaimShortcutMixin(ABC):
     """A mixin class for anything that takes a claim as the only required init argument."""
 
     if TYPE_CHECKING:
+        claim: pywikibot.Claim
 
         def __init__(self, claim: pywikibot.Claim) -> None:
             ...
@@ -119,6 +120,9 @@ class ClaimShortcutMixin(ABC):
             else:
                 retvals.append(cls.from_property_id_and_item_id_value(key, value))
         return retvals
+
+    def get_property_id(self) -> str:
+        return self.claim.getID(False)  # type: ignore
 
 
 @dataclasses.dataclass
