@@ -10,10 +10,10 @@ from pywikibot import Claim, ItemPage
 
 
 class MyBot(PropertyAdderBot):
-    def get_edit_summary(self, page):
+    def get_edit_summary(self, item):
         return "Doing some stuff..."
 
-    def run_item(self, page):
+    def run_item(self, item):
         helper = OutputHelper()
         helper.add_property_from_property_id_and_value("P31", "Q5")  # instance of human
         extra_prop = ExtraProperty.from_property_id_and_value(
