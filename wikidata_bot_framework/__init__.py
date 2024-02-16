@@ -50,6 +50,7 @@ from .utils import (
     add_qualifier_locally,  # noqa: F401
     add_reference_locally,  # noqa: F401
     get_random_hex,  # noqa: F401
+    get_sparql_query,  # noqa: F401
     append_to_source,  # noqa: F401
     merge_reference_groups,  # noqa: F401
     OutputHelper,  # noqa: F401
