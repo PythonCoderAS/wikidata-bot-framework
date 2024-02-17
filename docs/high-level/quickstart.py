@@ -10,7 +10,7 @@ from pywikibot import Claim, ItemPage
 
 
 class MyBot(PropertyAdderBot):
-    def get_edit_summary(self, item):
+    def get_edit_summary(self, page):
         return "Doing some stuff..."
 
     def run_item(self, item):
