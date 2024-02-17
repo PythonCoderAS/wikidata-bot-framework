@@ -50,7 +50,7 @@ def merge_reference_groups(
     acted = False
     for new_reference in new_references:
         new_reference_id: str = new_reference.getID(False)  # type: ignore
-        if new_reference not in reference_group:
+        if new_reference_id not in reference_group:
             reference_group.setdefault(new_reference_id, []).append(new_reference)
             acted = True
     return acted
