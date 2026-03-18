@@ -38,7 +38,7 @@ dependencies = [
 repository = "https://github.com/PythonCoderAS/wikidata-bot-framework"
 
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools==82.0.1"]
 build-backend = "setuptools.build_meta"
 
 [dependency-groups]
@@ -60,8 +60,7 @@ lint = [
     "mypy==1.19.1",
 ]
 types = [
-    "types-requests==2.32.4.20260107",
-    "types-setuptools==82.0.0.20260210",
+    "types-requests==2.32.4.20260107"
 ]
 dev = [
     "poethepoet>=0.42.1",
@@ -112,3 +111,6 @@ format = "ruff format ."
 format-ci = "ruff format . --check"
 typelint = "mypy ."
 docs-lint = "sphinx-lint docs"
+
+[tool.pyright]
+exclude = ["user-password.py", "setup.py", ".venv", "node_modules", "dist", "build", "__pycache__"]
