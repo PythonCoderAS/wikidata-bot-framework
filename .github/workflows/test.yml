@@ -35,6 +35,7 @@ jobs:
         run: echo "$PWD/.venv/bin" >> $GITHUB_PATH
 
       - name: Add password
+        if: ${{ github.actor != 'dependabot[bot]' }}
         run: echo "$USER_PASSWORD" > user-password.py
         env:
           USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
