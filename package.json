@@ -13,7 +13,7 @@
   "devDependencies": {
     "markdownlint": "^0.40.0",
     "markdownlint-cli": "^0.48.0",
-    "prettier": "^3.2.4",
+    "prettier": "^3.8.1",
     "pyright": "^1.1.408"
   }
 }
