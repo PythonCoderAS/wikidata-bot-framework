@@ -1,8 +1,8 @@
 [project]
 name = "wikidata-bot-framework"
-version = "7.7.2"
+version = "8.0.0"
 description = "A framework for making Wikidata bots."
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 readme = "README.md"
 license = { text = "MIT License" }
 classifiers = [
@@ -27,20 +27,12 @@ classifiers = [
     "Topic :: Documentation :: Sphinx",
 ]
 dependencies = [
-    "pywikibot<9",
-    "mwparserfromhell",
-    "python-dotenv",
-    "sentry-sdk",
-    "typing-extensions",
+    "pywikibot==11.1.0",
+    "mwparserfromhell==0.7.2",
+    "python-dotenv==1.2.2",
+    "sentry-sdk==2.55.0",
+    "typing-extensions==4.15.0",
 ]
-
-[project.optional-dependencies]
-docs = [
-    "sphinx",
-    "sphinx_rtd_theme",
-]
-test = ["pytest"]
-lint = ["ruff"]
 
 [project.urls]
 repository = "https://github.com/PythonCoderAS/wikidata-bot-framework"
@@ -51,27 +43,27 @@ build-backend = "setuptools.build_meta"
 
 [dependency-groups]
 docs = [
-    "sphinx",
-    "furo",
-    "sphinxext-opengraph",
-    "sphinx-copybutton",
+    "sphinx==9.1.0",
+    "furo==2025.12.19",
+    "sphinxext-opengraph==0.13.0",
+    "sphinx-copybutton==0.5.2",
 ]
 test = [
-    "pytest",
-    "pytest-timeout",
-    "pytest-cov",
+    "pytest==9.0.2",
+    "pytest-timeout==2.4.0",
+    "pytest-cov==7.0.0",
 ]
 lint = [
-    "ruff",
-    "mypy",
-    "sphinx-lint",
+    "ruff==0.15.6",
+    "mypy==1.19.1",
+    "sphinx-lint==1.0.2",
 ]
 types = [
-    "types-requests",
-    "types-setuptools",
+    "types-requests==2.32.4.20260107",
+    "types-setuptools==82.0.0.20260210",
 ]
 dev = [
-    "pre-commit",
+    "pre-commit==4.5.1",
 ]
 
 [tool.uv]
