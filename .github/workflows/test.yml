@@ -38,7 +38,6 @@ jobs:
         run: cp user-config-sample.py user-config.py
 
       - name: Add username/password
-        if: ${{ github.actor != 'dependabot[bot]' }}
         run: |
           echo "usernames[family][mylang] = '$USER_NAME'" >> user-config.py
           echo "$USER_PASSWORD" > user-password.py

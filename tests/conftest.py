@@ -1,6 +1,5 @@
 import pytest
 import pywikibot.config
-import pywikibot.login
 
 
 def pytest_addoption(parser: pytest.Parser):
