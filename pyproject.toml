@@ -47,6 +47,7 @@ docs = [
     "furo==2025.12.19",
     "sphinxext-opengraph==0.13.0",
     "sphinx-copybutton==0.5.2",
+    "sphinx-lint==1.0.2",
 ]
 test = [
     "pytest==9.0.2",
@@ -56,13 +57,13 @@ test = [
 lint = [
     "ruff==0.15.6",
     "mypy==1.19.1",
-    "sphinx-lint==1.0.2",
 ]
 types = [
     "types-requests==2.32.4.20260107",
     "types-setuptools==82.0.0.20260210",
 ]
 dev = [
+    "poethepoet>=0.42.1",
     "pre-commit==4.5.1",
 ]
 
@@ -101,3 +102,12 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 addopts = "-ra --color=yes --cov=wikidata_bot_framework --cov-report=lcov"
+
+[tool.poe.tasks]
+test = "pytest"
+lint = "ruff check . --fix"
+lint-ci = "ruff check ."
+format = "ruff format ."
+format-ci = "ruff format . --check"
+typelint = "mypy ."
+docs-lint = "sphinx-lint docs"

@@ -7,60 +7,32 @@ on:
     branches: ["master"]
 
 jobs:
-  build-versioned-deps:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install pipenv
-        run: |
-          pip install --upgrade pip
-          pip install pipenv
-
-      - name: Generate requirements.txt
-        run: pipenv requirements --dev > requirements.txt
-
-      - name: Upload requirements.txt
-        uses: actions/upload-artifact@v4
-        with:
-          name: requirements.txt
-          path: requirements.txt
-
   test:
     runs-on: ubuntu-latest
-    needs:
-      - build-versioned-deps
     strategy:
       matrix:
         python-version:
-          - "3.9"
-          - "3.10"
-          - "3.11"
           - "3.12"
+          - "3.13"
+          - "3.14"
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: "Set up Python"
+        uses: actions/setup-python@v6
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: "pip"
+          python-version-file: ".python-version"
 
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: requirements.txt
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
 
-      - name: Install requirements
-        run: pip install -r requirements.txt
+      - name: Sync dependencies
+        run: uv sync --group test
+
+      - name: Add venv to path
+        run: echo "$PWD/.venv/bin" >> $GITHUB_PATH
 
       - name: Add password
         run: echo "$USER_PASSWORD" > user-password.py
@@ -84,23 +56,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: "Set up Python"
+        uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
-          cache: "pip"
+          python-version-file: ".python-version"
 
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: requirements.txt
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
 
-      - name: Install requirements
-        run: pip install -r requirements.txt
+      - name: Sync dependencies
+        run: uv sync --group test
 
       - name: Upload coverage
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
-          carryforward: "py-3.9,py-3.10,py-3.11,py-3.12"
+          carryforward: "py-3.12,py-3.13,py-3.14"

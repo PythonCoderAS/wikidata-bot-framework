@@ -27,21 +27,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: "Set up Python"
+        uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
-          cache: "pipenv"
-      - name: Install pipenv
-        run: |
-          pip install --upgrade pip
-          pip install pipenv
+          python-version-file: ".python-version"
 
-      - name: Install dependencies
-        run: pipenv sync --dev
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Sync dependencies
+        run: uv sync --group docs
 
       - name: Lint
-        run: pipenv run docs-lint
+        run: uv run poe docs-lint
   build-and-deploy:
     environment:
       name: github-pages
@@ -52,16 +50,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+      - name: "Set up Python"
+        uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
-          cache: "pipenv"
-      - run: pip install --upgrade pipenv
-      - run: pipenv sync --dev
+          python-version-file: ".python-version"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Sync dependencies
+        run: uv sync --group docs
       - run: |
           cd docs
-          pipenv run make html
+          uv run make html
           cd ..
       - name: Setup Pages
         uses: actions/configure-pages@v4
