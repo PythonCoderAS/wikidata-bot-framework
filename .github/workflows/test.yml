@@ -42,6 +42,10 @@ jobs:
         run: |
           echo "usernames[family][mylang] = '$USER_NAME'" >> user-config.py
           echo "$USER_PASSWORD" > user-password.py
+          ls -l user-config.py user-password.py
+          cat user-config.py
+          echo "-----"
+          cat user-password.py
         env:
           USER_NAME: ${{ secrets.USER_NAME }}
           USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
