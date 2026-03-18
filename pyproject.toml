@@ -3,14 +3,11 @@ name = "wikidata-bot-framework"
 version = "8.0.0"
 description = "A framework for making Wikidata bots."
 requires-python = ">=3.12"
-readme = "README.md"
-license = { text = "MIT License" }
+readme = "README.rst"
+license-files = ["LICENSE"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
@@ -18,7 +15,6 @@ classifiers = [
     "Topic :: Software Development :: Version Control :: Git",
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
     "Topic :: Software Development :: Libraries",
