@@ -1,4 +1,5 @@
 import pytest
+import pywikibot.config
 
 
 def pytest_addoption(parser: pytest.Parser):
@@ -8,6 +9,10 @@ def pytest_addoption(parser: pytest.Parser):
         default=False,
         help="Run tests in simulation mode",
     )
+
+def pytest_configure(config: pytest.Config):
+    if config.getoption("--simulate"):
+        pywikibot.config.simulate = True
 
 
 @pytest.fixture(autouse=True)
