@@ -43,6 +43,7 @@ jobs:
           echo "usernames[family][mylang] = '$USER_NAME'" >> user-config.py
           echo "$USER_PASSWORD" > user-password.py
         env:
+          USER_NAME: ${{ secrets.USER_NAME }}
           USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
 
       - name: Test
