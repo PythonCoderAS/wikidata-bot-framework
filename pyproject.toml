@@ -48,6 +48,7 @@ docs = [
     "sphinxext-opengraph==0.13.0",
     "sphinx-copybutton==0.5.2",
     "sphinx-lint==1.0.2",
+    "myst_parser==5.0.0"
 ]
 test = [
     "pytest==9.0.2",
@@ -85,7 +86,7 @@ include = ["wikidata_bot_framework*"]
 profile = "black"
 skip_gitignore = true
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 combine-as-imports = true
 order-by-type = true
 

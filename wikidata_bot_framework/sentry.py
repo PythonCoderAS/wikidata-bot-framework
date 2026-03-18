@@ -15,9 +15,7 @@ def load_sentry():
         sentry_sdk.init(
             data["SENTRY_DSN"],
             traces_sample_rate=1.0,
-            _experiments={
-                "profiles_sample_rate": 1.0,
-            },
+            profiles_sample_rate=1.0,
             ignore_errors=[KeyboardInterrupt],
             attach_stacktrace=True,
         )
@@ -43,6 +41,7 @@ def start_span(**kwargs) -> Iterator[Union[sentry_sdk.tracing.Span, None]]:
             with sentry_sdk.start_span(**kwargs) as span:
                 yield span
         else:
+            assert isinstance(span, sentry_sdk.tracing.Span)
             with span.start_child(**kwargs) as span:
                 yield span
     else:

@@ -19,8 +19,7 @@ class ClaimShortcutMixin(ABC):
     if TYPE_CHECKING:
         claim: pywikibot.Claim
 
-        def __init__(self, claim: pywikibot.Claim) -> None:
-            ...
+        def __init__(self, claim: pywikibot.Claim) -> None: ...
 
     @classmethod
     def from_property_id_and_value(

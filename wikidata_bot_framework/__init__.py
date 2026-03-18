@@ -5,7 +5,7 @@ from json import dumps
 from typing import Any, Iterable, List, Literal, Mapping, Optional, Union, overload
 
 import pywikibot
-from sentry_sdk import push_scope, new_scope
+from sentry_sdk import new_scope
 
 # Make all imports from submodules available here
 
@@ -278,8 +278,7 @@ class PropertyAdderBot(ABC):
         reason: Literal[ProcessReason.missing_property, ProcessReason.missing_value],
         *,
         claim: ExtraProperty,
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     @overload
     def processed_hook(
@@ -289,8 +288,7 @@ class PropertyAdderBot(ABC):
         *,
         claim: ExtraProperty,
         context: DifferentRankContext,
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     @overload
     def processed_hook(
@@ -300,8 +298,7 @@ class PropertyAdderBot(ABC):
         *,
         claim: ExtraProperty,
         context: ReplaceValueContext,
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     @overload
     def processed_hook(
@@ -311,8 +308,7 @@ class PropertyAdderBot(ABC):
         *,
         claim: ExtraProperty,
         context: DeleteValuesContext,
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     @overload
     def processed_hook(
@@ -325,8 +321,7 @@ class PropertyAdderBot(ABC):
         *,
         claim: ExtraProperty,
         qualifier: ExtraQualifier,
-    ):
-        ...
+    ): ...
 
     @overload
     def processed_hook(
@@ -337,8 +332,7 @@ class PropertyAdderBot(ABC):
         claim: ExtraProperty,
         qualifier: ExtraQualifier,
         context: ReplaceQualifierValueContext,
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     @overload
     def processed_hook(
@@ -349,8 +343,7 @@ class PropertyAdderBot(ABC):
         claim: ExtraProperty,
         qualifier: ExtraQualifier,
         context: DeleteQualifierValuesContext,
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     @overload
     def processed_hook(
@@ -361,8 +354,7 @@ class PropertyAdderBot(ABC):
         claim: ExtraProperty,
         qualifier: ExtraQualifier,
         context: NewClaimFromQualifierContext,
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     @overload
     def processed_hook(
@@ -372,8 +364,7 @@ class PropertyAdderBot(ABC):
         *,
         claim: ExtraProperty,
         reference: ExtraReference,
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     @overload
     def processed_hook(
@@ -384,16 +375,14 @@ class PropertyAdderBot(ABC):
         claim: ExtraProperty,
         reference: ExtraReference,
         context: MergedReferenceContext,
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     @overload
     def processed_hook(
         self,
         item: EntityPage,
         reason: Literal[ProcessReason.post_output],
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     def processed_hook(
         self,
@@ -654,9 +643,9 @@ class PropertyAdderBot(ABC):
                                                     old_value=old_value,
                                                 ),
                                             )
-                                            qualifier = (
-                                                qualifier_data.claim
-                                            ) = existing_qualifier
+                                            qualifier = qualifier_data.claim = (
+                                                existing_qualifier
+                                            )
                                             if (
                                                 len(
                                                     new_claim.qualifiers[qualifier_prop]
@@ -692,9 +681,9 @@ class PropertyAdderBot(ABC):
                                     ):
                                         if self.can_add_main_property(extra_prop_data):
                                             old_claim = new_claim
-                                            new_claim = (
-                                                extra_prop_data.claim
-                                            ) = original_claim
+                                            new_claim = extra_prop_data.claim = (
+                                                original_claim
+                                            )
                                             add_claim_locally(item, new_claim)
                                             for qualifier in added_qualifiers:
                                                 add_qualifier_locally(
