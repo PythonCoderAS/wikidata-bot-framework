@@ -6,6 +6,7 @@ from requests import Session
 from requests.adapters import HTTPAdapter, Retry
 
 session = Session()
+session.headers["User-Agent"] = "WikidataBotFramework/7.7.2"
 _retry = Retry(
     total=5,
     backoff_factor=2,
