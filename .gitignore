@@ -133,3 +133,5 @@ apicache*/
 pywikibot*.lwp
 throttle.ctrl
 user-password.py
+
+node_modules
