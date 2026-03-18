@@ -93,7 +93,7 @@ order-by-type = true
 docstring-code-format = true
 
 [tool.mypy]
-exclude = ["user-config.py", "user-password.py"]
+exclude = ["user-config.py", "user-password.py", "setup.py", ".venv", "node_modules", "dist", "build", "__pycache__"]
 check_untyped_defs = true
 
 [[tool.mypy.overrides]]
