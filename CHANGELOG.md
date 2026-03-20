@@ -1,6 +1,5 @@
 # CHANGELOG
 
-
 ## v8.0.1 (2026-03-20)
 
 ### Bug Fixes
@@ -28,11 +27,8 @@
 - **config**: Configure Python Semantic Release
   ([`04febb7`](https://github.com/PythonCoderAS/wikidata-bot-framework/commit/04febb719fea76a869ca684602249333f742b91e))
 
-
 ## v8.0.0 (2026-03-18)
 
-
 ## v7.3.0 (2024-01-25)
-
 
 ## v7.2.1 (2024-01-25)
