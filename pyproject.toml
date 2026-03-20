@@ -1,6 +1,6 @@
 [project]
 name = "wikidata-bot-framework"
-version = "8.0.0"
+version = "8.0.1"
 description = "A framework for making Wikidata bots."
 requires-python = ">=3.12"
 readme = "README.rst"
