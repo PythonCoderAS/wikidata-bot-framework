@@ -22,6 +22,9 @@
 - Further fix again
   ([`9373907`](https://github.com/PythonCoderAS/wikidata-bot-framework/commit/9373907d57e11ef851e676ec3d646b71a4329e25))
 
+- Only run release on push and fix publish on push
+  ([`a8ac670`](https://github.com/PythonCoderAS/wikidata-bot-framework/commit/a8ac6701f2060fca7894a7617b7999e4f3bfd9f9))
+
 - **config**: Configure Python Semantic Release
   ([`04febb7`](https://github.com/PythonCoderAS/wikidata-bot-framework/commit/04febb719fea76a869ca684602249333f742b91e))
 
