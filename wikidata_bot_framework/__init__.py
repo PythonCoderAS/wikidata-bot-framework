@@ -9,6 +9,8 @@ from sentry_sdk import new_scope
 
 # Make all imports from submodules available here
 
+from .__version__ import __version__, version_info  # noqa: F401
+
 from .constants import (
     session,  # noqa: F401
     url_prop,  # noqa: F401

@@ -154,3 +154,10 @@ cmd = "sh -c 'poe all-lint-ci && poe test'"
 
 [tool.pyright]
 exclude = ["user-password.py", "setup.py", ".venv", "node_modules", "dist", "build", "__pycache__"]
+
+[tool.semantic_release]
+version_toml = ["pyproject.toml:project.version"]
+
+upload_to_pypi = false # We will handle this in the workflow
+upload_to_release = true
+build_command = "uv build"
