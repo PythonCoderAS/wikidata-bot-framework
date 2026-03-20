@@ -5,5 +5,5 @@ try:
     __version__ = get_version(package)
 except PackageNotFoundError:
     # This can be hit during tests
-    __version__ = "8.0.1"
+    __version__ = "9.0.0"
 version_info = tuple(__version__.split("."))
