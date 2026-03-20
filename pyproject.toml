@@ -161,4 +161,4 @@ version_toml = ["pyproject.toml:project.version"]
 
 upload_to_pypi = false # We will handle this in the workflow
 upload_to_release = true
-build_command = "uv build"
+build_command = "sh -c 'return 0'" # We will build the package in the workflow, so we don't want semantic-release to do it automatically
