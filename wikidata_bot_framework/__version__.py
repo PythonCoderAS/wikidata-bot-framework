@@ -1,7 +1,8 @@
 from importlib.metadata import version as get_version, PackageNotFoundError
 
 try:
-    __version__ = get_version(__package__)
+    package = __package__ or "wikidata_bot_framework"
+    __version__ = get_version(package)
 except PackageNotFoundError:
     # This can be hit during tests
     __version__ = "8.0.0"
