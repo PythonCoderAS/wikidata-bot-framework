@@ -1,4 +1,4 @@
-name: Test
+name: Test and Release
 
 on:
   push:
@@ -90,7 +90,6 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          token: ${{ secrets.GH_TOKEN }} # Use a PAT if you want the commit to trigger other actions
 
       - name: Python Semantic Release
         id: sr
