@@ -163,6 +163,7 @@ class OutputHelper(
 @overload
 def get_sparql_query(
     property_val: str,
+    /,
     *,
     filter_out_unknown_value: bool = True,
 ) -> Mapping[str, set[str]]: ...
@@ -171,6 +172,8 @@ def get_sparql_query(
 @overload
 def get_sparql_query(
     property_val: str,
+    property_val2: str,
+    /,
     *property_values: str,
     multiple_or: Literal[True],
     or_return_value: Literal[False],
@@ -181,6 +184,8 @@ def get_sparql_query(
 @overload
 def get_sparql_query(
     property_val: str,
+    property_val2: str,
+    /,
     *property_values: str,
     multiple_or: Literal[True],
     or_return_value: Literal[True],
@@ -191,6 +196,8 @@ def get_sparql_query(
 @overload
 def get_sparql_query(
     property_val: str,
+    property_val2: str,
+    /,
     *property_values: str,
     multiple_or: Literal[False],
     or_return_value: bool = True,
@@ -200,6 +207,7 @@ def get_sparql_query(
 
 def get_sparql_query(
     property_val: str,
+    /,
     *property_values: str,
     multiple_or: bool = True,
     or_return_value: bool = False,
