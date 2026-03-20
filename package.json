@@ -8,7 +8,9 @@
     "lint:check": "prettier --check .",
     "pyright": "pyright --warnings",
     "mdlint": "markdownlint --fix docs",
-    "mdlint:check": "markdownlint --fix --output docs"
+    "mdlint:check": "markdownlint --fix --output docs",
+    "all": "npm run lint && npm run pyright && npm run mdlint",
+    "all:check": "npm run lint:check && npm run pyright && npm run mdlint:check"
   },
   "devDependencies": {
     "markdownlint": "^0.40.0",

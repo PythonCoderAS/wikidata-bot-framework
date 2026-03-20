@@ -99,14 +99,58 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 addopts = "-ra --color=yes --cov=wikidata_bot_framework --cov-report=lcov"
 
-[tool.poe.tasks]
-test = "pytest"
-lint = "ruff check . --fix"
-lint-ci = "ruff check ."
-format = "ruff format ."
-format-ci = "ruff format . --check"
-typelint = "mypy ."
-docs-lint = "sphinx-lint docs"
+
+[tool.poe.tasks.test]
+help = "Run simulated tests with pytest."
+cmd = "pytest --simulate"
+
+[tool.poe.tasks.test-integration]
+help = "Run real tests with pytest (no simulate)."
+cmd = "pytest"
+
+[tool.poe.tasks.lint]
+help = "Run ruff to lint and fix code."
+cmd = "ruff check . --fix"
+
+[tool.poe.tasks.lint-ci]
+help = "Run ruff to lint code without fixing (for CI)."
+cmd = "ruff check ."
+
+[tool.poe.tasks.format]
+help = "Run ruff to format code."
+cmd = "ruff format ."
+
+[tool.poe.tasks.format-ci]
+help = "Run ruff to check code formatting without making changes (for CI)."
+cmd = "ruff format . --check"
+
+[tool.poe.tasks.typelint]
+help = "Run mypy to check type annotations."
+cmd = "mypy ."
+
+[tool.poe.tasks.docs-lint]
+help = "Run sphinx-lint to check documentation."
+cmd = "sphinx-lint docs"
+
+[tool.poe.tasks.all-lint]
+help = "Run all linting tasks (code and docs)."
+cmd = "sh -c 'poe lint && poe format && poe typelint && poe docs-lint'"
+
+[tool.poe.tasks.all-lint-ci]
+help = "Run all linting tasks (code and docs) without fixing (for CI)."
+cmd = "sh -c 'poe lint-ci && poe format-ci && poe typelint && poe docs-lint'"
+
+[tool.poe.tasks.all]
+help = "Run all tasks (lint, format, typelint, docs-lint, test)."
+cmd = "sh -c 'poe all-lint && poe test'"
+
+[tool.poe.tasks.all-integration]
+help = "Run all tasks (including real tests) (lint, format, typelint, docs-lint, test-integration)."
+cmd = "sh -c 'poe all-lint && poe test-integration'"
+
+[tool.poe.tasks.all-ci]
+help = "Run all CI tasks (lint, format, typelint, docs-lint, test)."
+cmd = "sh -c 'poe all-lint-ci && poe test'"
 
 [tool.pyright]
 exclude = ["user-password.py", "setup.py", ".venv", "node_modules", "dist", "build", "__pycache__"]
