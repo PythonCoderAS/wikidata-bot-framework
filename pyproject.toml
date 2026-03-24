@@ -85,6 +85,9 @@ skip_gitignore = true
 [tool.ruff.lint.isort]
 combine-as-imports = true
 order-by-type = true
+force-sort-within-sections = true
+known-local-folder = ["wikidata_bot_framework"]
+no-sections = false
 
 [tool.ruff.format]
 docstring-code-format = true

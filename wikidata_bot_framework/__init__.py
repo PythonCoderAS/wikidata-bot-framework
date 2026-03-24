@@ -2,7 +2,17 @@ from abc import ABC, abstractmethod
 from copy import copy
 from dataclasses import dataclass, field
 from json import dumps
-from typing import Any, Iterable, List, Literal, Mapping, Optional, Union, overload
+from typing import (
+    Any,
+    Iterable,
+    List,
+    Literal,
+    Mapping,
+    Optional,
+    Sequence,
+    Union,
+    overload,
+)
 
 import pywikibot
 from sentry_sdk import new_scope
@@ -196,7 +206,22 @@ class PropertyAdderBot(ABC):
         """
         return existing_qualifier.getTarget() == new_qualifier.getTarget()
 
-    def post_output_process_hook(self, output: Output, item: EntityPage) -> bool:
+    def ensure_output_sequence(
+        self, output: Output | Sequence[Output]
+    ) -> Sequence[Output]:
+        """Convert a single output to a sequence of Output if necessary.
+
+        :param output: The output to ensure is a sequence.
+        :return: A sequence of Outputs.
+        """
+        if isinstance(output, Sequence):
+            assert not isinstance(output, Mapping)
+            return output
+        return [output]
+
+    def post_output_process_hook(
+        self, output: Output | Sequence[Output], item: EntityPage
+    ) -> bool:
         """Do additional processing after all output has been processed.
 
         :param output: The output that was processed.
@@ -206,7 +231,9 @@ class PropertyAdderBot(ABC):
         """
         return False
 
-    def pre_edit_process_hook(self, output: Output, item: EntityPage) -> None:
+    def pre_edit_process_hook(
+        self, output: Output | Sequence[Output], item: EntityPage
+    ) -> None:
         """Do additional processing before the item is edited.
 
         This hook only fires if an API request will be made.
@@ -215,7 +242,9 @@ class PropertyAdderBot(ABC):
         :param item: The item that will be edited.
         """
 
-    def post_edit_process_hook(self, output: Output, item: EntityPage) -> None:
+    def post_edit_process_hook(
+        self, output: Output | Sequence[Output], item: EntityPage
+    ) -> None:
         """Do additional processing after the item is edited.
 
         This hook only fires if an API request was made.
@@ -765,14 +794,18 @@ class PropertyAdderBot(ABC):
             previous_hash = hash(dumps(item.toJSON()))
         return acted
 
-    def process(self, output: Output, item: EntityPage) -> bool:
+    def process(self, output: Output | Sequence[Output], item: EntityPage) -> bool:
         """Processes the output from run_item.
 
         :param output: The output to process
         :param item: The item to process
         :return: If any edits were made to the item.
         """
-        acted = self.merge_output_with_item(output, item)
+        acted = False
+        output = self.ensure_output_sequence(output)
+        for individual_output in output:
+            assert not isinstance(individual_output, str)
+            acted |= self.merge_output_with_item(individual_output, item)
         with start_span(
             op="post_output_process", description="Post Output Process Hook"
         ):

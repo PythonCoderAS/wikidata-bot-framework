@@ -1,3 +1,4 @@
+from typing import Sequence
 import pytest
 import pywikibot
 from wikidata_bot_framework import Output
@@ -15,13 +16,17 @@ class SimpleTestBot(TestPAB):
         claim.setTarget(pywikibot.WbTime(year=2021, month=1, day=1))
         return {retrieved_prop: [ExtraProperty(claim)]}
 
-    def post_edit_process_hook(self, output: Output, item: EntityPage) -> None:
-        if not self.simulate:
-            item.removeClaims(
-                output[retrieved_prop][0].claim,
-                summary=super().get_full_summary("Removing test claim"),
-                bot=True,
-            )
+    def post_edit_process_hook(
+        self, output: Output | Sequence[Output], item: EntityPage
+    ) -> None:
+        output = self.ensure_output_sequence(output)
+        for output_item in output:
+            if not self.simulate:
+                item.removeClaims(
+                    output_item[retrieved_prop][0].claim,
+                    summary=super().get_full_summary("Removing test claim"),
+                    bot=True,
+                )
 
 
 def test_simple_test_bot(pytestconfig: pytest.Config):
