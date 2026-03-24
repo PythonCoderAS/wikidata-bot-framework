@@ -123,6 +123,9 @@ class ClaimShortcutMixin(ABC):
     def get_property_id(self) -> str:
         return self.claim.getID(False)  # type: ignore
 
+    def same_claim(self, other: Self) -> bool:
+        return self.claim == other.claim
+
 
 @dataclasses.dataclass
 class ExtraQualifier(ClaimShortcutMixin):
@@ -144,6 +147,7 @@ class ExtraQualifier(ClaimShortcutMixin):
 
     def __post_init__(self):
         self.claim.isQualifier = True
+        self.claim.isReference = False
 
 
 @dataclasses.dataclass
