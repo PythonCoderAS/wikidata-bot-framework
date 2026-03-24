@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v9.1.0 (2026-03-24)
+
+### Features
+
+- Seperate the merging of output from the rest of processing
+  ([`5c95284`](https://github.com/PythonCoderAS/wikidata-bot-framework/commit/5c952847d9cb950fd89effa59152fc1be961b22a))
+
+
 ## v9.0.0 (2026-03-20)
 
 ### Bug Fixes
