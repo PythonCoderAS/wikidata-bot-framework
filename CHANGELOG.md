@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v10.1.0 (2026-03-24)
+
+### Features
+
+- Allow checking if a property and qualifiers would conflict
+  ([`36f4f6a`](https://github.com/PythonCoderAS/wikidata-bot-framework/commit/36f4f6a0040f1873d539ad8a4aa9e9ee37428a1c))
+
+
 ## v10.0.0 (2026-03-24)
 
 ### Features
