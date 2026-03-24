@@ -422,8 +422,8 @@ class PropertyAdderBot(ABC):
         """
         return False
 
-    def process(self, output: Output, item: EntityPage) -> bool:
-        """Processes the output from run_item.
+    def merge_output_with_item(self, output: Output, item: EntityPage) -> bool:
+        """Actually does the main work of merging the output with the item.
 
         :param output: The output to process
         :param item: The item to process
@@ -763,6 +763,16 @@ class PropertyAdderBot(ABC):
                             acted = True
             second_previous_hash = previous_hash
             previous_hash = hash(dumps(item.toJSON()))
+        return acted
+
+    def process(self, output: Output, item: EntityPage) -> bool:
+        """Processes the output from run_item.
+
+        :param output: The output to process
+        :param item: The item to process
+        :return: If any edits were made to the item.
+        """
+        acted = self.merge_output_with_item(output, item)
         with start_span(
             op="post_output_process", description="Post Output Process Hook"
         ):
