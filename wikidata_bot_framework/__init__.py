@@ -159,7 +159,7 @@ class PropertyAdderBot(ABC):
     def run_item(
         self,
         item: EntityPage,
-    ) -> Output:
+    ) -> Output | Sequence[Output]:
         """The main work that should be done externally.
 
         This method will take an item and return a dictionary of list of ExtraProperties.
