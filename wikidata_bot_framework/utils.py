@@ -8,7 +8,7 @@ from typing_extensions import Self
 import pywikibot
 
 from .constants import EntityPage, session, preferred_rank_reason_prop, site
-from .dataclasses import ExtraProperty, PossibleValueType
+from .dataclasses import ExtraProperty, PossibleValueType, ExtraQualifier
 
 entity_url_regex = re.compile(
     r"^https?://(?:www\.)?wikidata\.org/entity/(Q|P|L)(\d+)$", re.IGNORECASE
@@ -386,3 +386,29 @@ def get_entity_id_from_entity_url(entity_url: str) -> str:
     """
     assert entity_url_regex.match(entity_url), "Invalid entity URL"
     return entity_url.split("/")[-1]
+
+
+def qualifiers_equal(
+    first: list[ExtraQualifier],
+    second: list[ExtraQualifier],
+    require_rank_to_match: bool = True,
+) -> bool:
+    """Compares two lists of ExtraQualifiers, and returns if they are equal without respecting order.
+
+    :param first: The first list to be compared.
+    :param second: The second list to be compared.
+    :param require_rank_to_match: If the ranks of the claims have to match.
+    :return:
+    """
+    for first_qualifier in first:
+        found_match = False
+        for second_qualifier in second:
+            if first_qualifier.same_claim(second_qualifier) and (
+                not require_rank_to_match
+                or first_qualifier.claim.rank == second_qualifier.claim.rank
+            ):
+                found_match = True
+                break
+        if not found_match:
+            return False
+    return True

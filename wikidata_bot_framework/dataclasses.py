@@ -1,8 +1,29 @@
+from pywikibot import (
+    WbGeoShape,
+    Coordinate,
+    WbMonolingualText,
+    WbQuantity,
+    WbTabularData,
+    WbTime,
+    ItemPage,
+    LexemePage,
+    LexemeForm,
+    LexemeSense,
+)
+from pywikibot.page import FilePage
 from abc import ABC
 import dataclasses
 import datetime
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Literal, Mapping, MutableMapping, Pattern, Union
+from typing import (
+    TYPE_CHECKING,
+    Literal,
+    Mapping,
+    MutableMapping,
+    Pattern,
+    Union,
+    TypeAlias,
+)
 
 import pywikibot
 from typing_extensions import Self
@@ -10,7 +31,20 @@ from typing_extensions import Self
 from .constants import retrieved_prop, site, url_prop
 
 WikidataReference = MutableMapping[str, list[pywikibot.Claim]]
-PossibleValueType = Any
+PossibleValueType: TypeAlias = (
+    str
+    | FilePage
+    | WbGeoShape
+    | Coordinate
+    | WbMonolingualText
+    | WbQuantity
+    | WbTabularData
+    | WbTime
+    | ItemPage
+    | LexemePage
+    | LexemeForm
+    | LexemeSense
+)
 
 
 class ClaimShortcutMixin(ABC):
@@ -63,12 +97,15 @@ class ClaimShortcutMixin(ABC):
         :return: The new instance.
         """
         final = {**(mapping or {}), **kwargs}
-        retvals = []
+        retvals: list[Self] = []
         for key, value in final.items():
-            if isinstance(value, list):
-                retvals.extend(cls.from_property_id_and_values(key, value))
+            if not isinstance(value, PossibleValueType):
+                items: list[PossibleValueType] = value
+                new_values: list[Self] = cls.from_property_id_and_values(key, items)
+                retvals.extend(new_values)
             else:
-                retvals.append(cls.from_property_id_and_value(key, value))
+                new_val: Self = cls.from_property_id_and_value(key, value)
+                retvals.append(new_val)
         return retvals
 
     @classmethod
@@ -340,3 +377,19 @@ class ExtraProperty(ClaimShortcutMixin):
 
     def __post_init__(self):
         self.claim.isQualifier = self.claim.isReference = False
+
+    def conflicts_with(self, other: "ExtraProperty") -> bool:
+        """Returns if thw two claims cannot be merged together. They can be merged if other is the same value and other's
+        qualifiers are either not in self, or their values match. The qualifiers do not need to be in the same order."""
+        from .utils import qualifiers_equal
+
+        for qualifier_prop, qualifiers in self.qualifiers.items():
+            if qualifier_prop in other.qualifiers:
+                other_qualifiers = other.qualifiers[qualifier_prop]
+                if qualifiers_equal(qualifiers, other_qualifiers):
+                    continue
+                else:
+                    return True
+            else:
+                continue
+        return not other.same_claim(self)
