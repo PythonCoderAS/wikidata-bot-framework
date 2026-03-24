@@ -1,6 +1,31 @@
 # CHANGELOG
 
 
+## v10.0.0 (2026-03-24)
+
+### Features
+
+- Allow comparing claims and qualifiers on just the main claim
+  ([`4908ce7`](https://github.com/PythonCoderAS/wikidata-bot-framework/commit/4908ce779db0c24cb0dde6a2d81eb4d31d3c039e))
+
+- Allow returning multiple outputs and processing each
+  ([`32b88b8`](https://github.com/PythonCoderAS/wikidata-bot-framework/commit/32b88b8d7565adb7a74cf5e1643c893b7b026950))
+
+BREAKING CHANGE: The type signature for several methods have changed to also include
+  `Sequence[Output]` as a valid possibility. To always get a sequence, use the line `output =
+  self.ensure_output_sequence(output)`.
+
+Methods that need to be updated:
+
+- `post_output_process_hook` - `pre_edit_process_hook` - `post_edit_process_hook` - `process`
+
+### Breaking Changes
+
+- The type signature for several methods have changed to also include `Sequence[Output]` as a valid
+  possibility. To always get a sequence, use the line `output =
+  self.ensure_output_sequence(output)`.
+
+
 ## v9.1.0 (2026-03-24)
 
 ### Features
