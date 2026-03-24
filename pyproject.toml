@@ -99,7 +99,6 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 addopts = "-ra --color=yes --cov=wikidata_bot_framework --cov-report=lcov"
 
-
 [tool.poe.tasks.test]
 help = "Run simulated tests with pytest."
 cmd = "pytest --simulate"
