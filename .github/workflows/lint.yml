@@ -46,7 +46,27 @@ jobs:
         run: uv sync --group lint --group types
 
       - name: Type Lint
-        run: uv run poe typelint
+        run: uv run poe mypy
+  ty:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Sync dependencies
+        run: uv sync --group lint --group types
+
+      - name: Type Lint
+        run: uv run poe ty --output-format=github
   pyright:
     runs-on: ubuntu-latest
     strategy:

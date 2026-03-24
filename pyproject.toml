@@ -54,6 +54,7 @@ test = [
 lint = [
     "ruff==0.15.7",
     "mypy==1.19.1",
+    "ty==0.0.24"
 ]
 types = [
     "types-requests==2.32.4.20260107"
@@ -123,9 +124,13 @@ cmd = "ruff format ."
 help = "Run ruff to check code formatting without making changes (for CI)."
 cmd = "ruff format . --check"
 
-[tool.poe.tasks.typelint]
+[tool.poe.tasks.mypy]
 help = "Run mypy to check type annotations."
 cmd = "mypy ."
+
+[tool.poe.tasks.ty]
+help = "Run ty to check for type errors."
+cmd = "ty check ."
 
 [tool.poe.tasks.docs-lint]
 help = "Run sphinx-lint to check documentation."
@@ -133,26 +138,35 @@ cmd = "sphinx-lint docs"
 
 [tool.poe.tasks.all-lint]
 help = "Run all linting tasks (code and docs)."
-cmd = "sh -c 'poe lint && poe format && poe typelint && poe docs-lint'"
+cmd = "sh -c 'poe lint && poe format && poe mypy && poe ty && poe docs-lint'"
 
 [tool.poe.tasks.all-lint-ci]
 help = "Run all linting tasks (code and docs) without fixing (for CI)."
-cmd = "sh -c 'poe lint-ci && poe format-ci && poe typelint && poe docs-lint'"
+cmd = "sh -c 'poe lint-ci && poe format-ci && poe mypy && poe ty && poe docs-lint'"
 
 [tool.poe.tasks.all]
-help = "Run all tasks (lint, format, typelint, docs-lint, test)."
+help = "Run all tasks (lint, format, mypy, docs-lint, test)."
 cmd = "sh -c 'poe all-lint && poe test'"
 
 [tool.poe.tasks.all-integration]
-help = "Run all tasks (including real tests) (lint, format, typelint, docs-lint, test-integration)."
+help = "Run all tasks (including real tests) (lint, format, mypy, docs-lint, test-integration)."
 cmd = "sh -c 'poe all-lint && poe test-integration'"
 
 [tool.poe.tasks.all-ci]
-help = "Run all CI tasks (lint, format, typelint, docs-lint, test)."
+help = "Run all CI tasks (lint, format, mypy, docs-lint, test)."
 cmd = "sh -c 'poe all-lint-ci && poe test'"
 
 [tool.pyright]
 exclude = ["user-password.py", "setup.py", ".venv", "node_modules", "dist", "build", "__pycache__"]
+
+[tool.ty.src]
+exclude = ["user-password.py", "setup.py", ".venv", "node_modules", "dist", "build", "__pycache__"]
+
+[tool.ty.rules]
+unused-type-ignore-comment = "ignore"
+
+[tool.ty.terminal]
+error-on-warning = true
 
 [tool.semantic_release]
 version_variables = ["wikidata_bot_framework/__version__.py:__version__"]
