@@ -1,6 +1,22 @@
 # CHANGELOG
 
 
+## v11.0.0 (2026-03-27)
+
+### Features
+
+- Redo matching and merging
+  ([`900cb1d`](https://github.com/PythonCoderAS/wikidata-bot-framework/commit/900cb1df6431e5cf7b07aa329c97ff91da49e1d8))
+
+BREAKING CHANGE: Several attributes on ExtraProperty and ExtraQualifier changed. Several of the
+  processed_hook arguments changed. There are many other breaking changes.
+
+### Breaking Changes
+
+- Several attributes on ExtraProperty and ExtraQualifier changed. Several of the processed_hook
+  arguments changed. There are many other breaking changes.
+
+
 ## v10.1.0 (2026-03-24)
 
 ### Features
