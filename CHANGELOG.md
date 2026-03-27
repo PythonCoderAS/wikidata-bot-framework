@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v11.0.1 (2026-03-27)
+
+### Bug Fixes
+
+- Allow comparing for equality if one type is a subtype of the other type
+  ([`a90d9cd`](https://github.com/PythonCoderAS/wikidata-bot-framework/commit/a90d9cd7979fc4c7d69341680e36fb905e12a936))
+
+
 ## v11.0.0 (2026-03-27)
 
 ### Features
