@@ -4,9 +4,6 @@ from . import TestPAB, sandbox_item
 
 
 class CycleTestBot(TestPAB):
-    def __init__(self, *, simulate: bool = True):
-        super().__init__(simulate=simulate)
-
     def get_edit_summary(self, page: EntityPage) -> str:
         return ""
 

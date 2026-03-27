@@ -19,9 +19,11 @@ class SimpleTestBot(TestPAB):
     def post_edit_process_hook(
         self, output: Output | Sequence[Output], item: EntityPage
     ) -> None:
+        import pywikibot.config
+
         output = self.ensure_output_sequence(output)
         for output_item in output:
-            if not self.simulate:
+            if not pywikibot.config.simulate:
                 item.removeClaims(
                     output_item[retrieved_prop][0].claim,
                     summary=super().get_full_summary("Removing test claim"),
@@ -30,6 +32,6 @@ class SimpleTestBot(TestPAB):
 
 
 def test_simple_test_bot(pytestconfig: pytest.Config):
-    bot = SimpleTestBot(simulate=pytestconfig.getoption("--simulate"))  # type: ignore
+    bot = SimpleTestBot()
     bot.act_on_item(sandbox_item)
     assert True  # If we get here, it worked

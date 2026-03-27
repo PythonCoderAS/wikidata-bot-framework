@@ -1,3 +1,4 @@
+from enum import Enum, auto
 from pywikibot import (
     WbGeoShape,
     Coordinate,
@@ -23,6 +24,7 @@ from typing import (
     Pattern,
     Union,
     TypeAlias,
+    Sequence,
 )
 
 import pywikibot
@@ -33,6 +35,7 @@ from .constants import retrieved_prop, site, url_prop
 WikidataReference = MutableMapping[str, list[pywikibot.Claim]]
 PossibleValueType: TypeAlias = (
     str
+    | None
     | FilePage
     | WbGeoShape
     | Coordinate
@@ -45,6 +48,36 @@ PossibleValueType: TypeAlias = (
     | LexemeForm
     | LexemeSense
 )
+
+
+class ConflictResolutionChoice(Enum):
+    IGNORE = auto()
+    """Ignore the conflicting claim and add both claims. This is the default."""
+    SKIP = auto()
+    """Don't add the claim and skip it. Does not add any qualifiers or references."""
+    SKIP_IF_CONFLICTING_LANGUAGE = auto()
+    """Same as Skip but only for claims that share the same language."""
+    SKIP_MAIN_CLAIM_ONLY = auto()
+    """Only skips the main claim. Adds any qualifers and references to the conflicting claim."""
+    REPLACE = auto()
+    """Replace the claim and ignore any other values."""
+    REPLACE_AND_DELETE = auto()
+    """Replace the claim and delete any other claims for the property."""
+    REFERENCE_ONLY = auto()
+    """Only adds the property's references to the conflicting claim."""
+
+
+class QualifierResolutionChoice(Enum):
+    IGNORE = auto()
+    """Ignore the conflicting claim and add both claims. This is the default."""
+    SKIP = auto()
+    """Don't add the claim and skip it."""
+    REPLACE = auto()
+    """Replace the claim and ignore any other values."""
+    REPLACE_AND_DELETE = auto()
+    """Replace the claim and delete any other claims for the qualifier."""
+    MAKE_NEW_PROPERTY = auto()
+    """Make a new property with the same value as the current property and the new qualifier."""
 
 
 class ClaimShortcutMixin(ABC):
@@ -168,19 +201,23 @@ class ClaimShortcutMixin(ABC):
 class ExtraQualifier(ClaimShortcutMixin):
     claim: pywikibot.Claim
     """The claim to add as a qualifier."""
-    skip_if_conflicting_exists: bool = False
-    """If a qualifier with the same value already exists, don't add it."""
-    replace_if_conflicting_exists: bool = False
-    """If a qualifier with the same value already exists, replace it."""
-    delete_other_if_replacing: bool = False
-    """If ``replace_if_conflicting_exists`` is True and there are multiple values for the same property, delete all
-    but the one being replaced."""
-    skip_if_conflicting_language_exists: bool = False
-    """If a qualifier with the same language already exists, don't add it."""
-    make_new_if_conflicting: bool = False
-    """If a qualifier with the same value already exists, make a new claim with the same value."""
     reference_only: bool = False
     """Do not add the qualifier, instead only use it for adding references."""
+    on_conflict: QualifierResolutionChoice = QualifierResolutionChoice.IGNORE
+    """If another qualifier exists for the given property ID and a different value, the action to take."""
+    on_conflict_more_specific_value: QualifierResolutionChoice = (
+        QualifierResolutionChoice.SKIP
+    )
+    """If another qualifier exists for the given property ID and a different value that is more specific than the given
+     value (for example, if the current value is a timestamp of just a year, while the conflicting value is a timestamp
+     with the same year but has a month and day attached), the action to take."""
+    on_conflict_less_specific_value: QualifierResolutionChoice = (
+        QualifierResolutionChoice.REPLACE
+    )
+    """The inverse of the more specific situation, where we have a more specific qualifier and the existing qualifier
+    is less specific."""
+    score: int = 1
+    """The score of the qualifier. Used to match properties where missing the qualifier will deduct that many units."""
 
     def __post_init__(self):
         self.claim.isQualifier = True
@@ -246,21 +283,31 @@ class ExtraReference:
 class ExtraProperty(ClaimShortcutMixin):
     claim: pywikibot.Claim
     """The claim to add."""
-    skip_if_conflicting_exists: bool = False
-    """If a claim with the same value already exists, don't add it."""
-    replace_if_conflicting_exists: bool = False
-    """If a claim with the same value already exists, replace it."""
-    delete_other_if_replacing: bool = False
-    """If ``replace_if_conflicting_exists`` is True and there are multiple values for the same property, delete all
-    but the one being replaced."""
-    skip_if_conflicting_language_exists: bool = False
-    """If a claim with the same language already exists, don't add it."""
+    on_conflict: ConflictResolutionChoice = ConflictResolutionChoice.IGNORE
+    """If another claim exists for the given property ID and a different value, the action to take."""
+    on_conflict_more_specific_value: ConflictResolutionChoice = (
+        ConflictResolutionChoice.SKIP
+    )
+    """If another claim exists for the given property ID and a different value that is more specific than the given
+     value (for example, if the current value is a timestamp of just a year, while the conflicting value is a timestamp
+     with the same year but has a month and day attached), the action to take."""
+    on_conflict_less_specific_value: ConflictResolutionChoice = (
+        ConflictResolutionChoice.REPLACE
+    )
+    """The inverse situation, where the new claim has a more specific value than the existing claim."""
     reference_only: bool = False
     """Do not add the claim, instead only use it for adding references."""
     qualifiers: defaultdict[str, list[ExtraQualifier]] = dataclasses.field(
-        default_factory=lambda: defaultdict(list)
+        default_factory=lambda: defaultdict(list), init=False
     )
+    """Qualifiers to add to the claim."""
+    qualifier_properties_required_to_match: list[str] = dataclasses.field(
+        default_factory=list
+    )
+    """In order to count as the "same claim", the existing claim must have these qualifier properties
+    (and they also need to be exist in :attr:`qualifiers`)."""
     extra_references: list[ExtraReference] = dataclasses.field(default_factory=list)
+    """References to add to the claim."""
 
     def add_qualifier(self, qualifier: ExtraQualifier):
         """Add a qualifier to the claim.
@@ -366,7 +413,17 @@ class ExtraProperty(ClaimShortcutMixin):
 
     @staticmethod
     def _qualifier_sorter(item: tuple[str, list[ExtraQualifier]]):
-        return any(qual.make_new_if_conflicting for qual in item[1])
+        return any(
+            qual.on_conflict == QualifierResolutionChoice.MAKE_NEW_PROPERTY
+            for qual in item[1]
+        )
+
+    def _check_qualifiers_required(self):
+        for required_qualifier in self.qualifier_properties_required_to_match:
+            if not self.qualifiers.get(required_qualifier, []):
+                raise ValueError(
+                    f"Qualifier {required_qualifier} is required but does not exist."
+                )
 
     def sort_qualifiers(self):
         """Sorts qualifiers so the ones with :attr:`.ExtraQualifier.make_new_if_conflicting` are first."""
@@ -377,6 +434,20 @@ class ExtraProperty(ClaimShortcutMixin):
 
     def __post_init__(self):
         self.claim.isQualifier = self.claim.isReference = False
+        if (
+            self.on_conflict_more_specific_value
+            == ConflictResolutionChoice.SKIP_IF_CONFLICTING_LANGUAGE
+        ):
+            raise ValueError(
+                "ConflictResolutionChoice.SKIP_IF_CONFLICTING_LANGUAGE is not a valid option for on_conflict_more_specific_value."
+            )
+        if (
+            self.on_conflict_less_specific_value
+            == ConflictResolutionChoice.SKIP_IF_CONFLICTING_LANGUAGE
+        ):
+            raise ValueError(
+                "ConflictResolutionChoice.SKIP_IF_CONFLICTING_LANGUAGE is not a valid option for on_conflict_less_specific_value."
+            )
 
     def conflicts_with(self, other: "ExtraProperty") -> bool:
         """Returns if thw two claims cannot be merged together. They can be merged if other is the same value and other's
@@ -393,3 +464,31 @@ class ExtraProperty(ClaimShortcutMixin):
             else:
                 continue
         return not other.same_claim(self)
+
+
+@dataclasses.dataclass
+class OpResult:
+    acted: bool = False
+    re_cycle: bool = False
+
+
+@dataclasses.dataclass
+class ConflictResolution:
+    result: OpResult
+    new_claims: Sequence[pywikibot.Claim]
+    skip_qualifier: bool = False
+    skip_reference: bool = False
+
+    def skip_all(self) -> Self:
+        self.skip_qualifier = True
+        self.skip_reference = True
+        return self
+
+    def __post_init__(self):
+        if isinstance(self.new_claims, Sequence):
+            if len(self.new_claims) < 1:
+                raise ValueError("At least one new claim is required.")
+
+    @property
+    def primary_new_claim(self) -> pywikibot.Claim:
+        return self.new_claims[0]

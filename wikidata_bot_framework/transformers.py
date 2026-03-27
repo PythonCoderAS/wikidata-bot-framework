@@ -10,7 +10,7 @@ from .constants import (
     link_rot_id,
     site,
 )
-from .dataclasses import ExtraProperty, ExtraQualifier
+from .dataclasses import ExtraProperty, ExtraQualifier, QualifierResolutionChoice
 
 
 def de_archivify_url_property(prop: ExtraProperty, deprecate: bool = True):
@@ -24,7 +24,7 @@ def de_archivify_url_property(prop: ExtraProperty, deprecate: bool = True):
         archive_url = pywikibot.Claim(site, archive_url_prop)
         archive_url.setTarget(full_url)
         prop.qualifiers[archive_url_prop].append(
-            ExtraQualifier(archive_url, skip_if_conflicting_exists=True)
+            ExtraQualifier(archive_url, on_conflict=QualifierResolutionChoice.SKIP)
         )
         archive_date = pywikibot.Claim(site, archive_date_prop)
         archive_date.setTarget(
@@ -33,10 +33,12 @@ def de_archivify_url_property(prop: ExtraProperty, deprecate: bool = True):
             )
         )
         prop.qualifiers[archive_date_prop].append(
-            ExtraQualifier(archive_date, skip_if_conflicting_exists=True)
+            ExtraQualifier(archive_date, on_conflict=QualifierResolutionChoice.SKIP)
         )
         deprecated_reason = pywikibot.Claim(site, deprecated_reason_prop)
         deprecated_reason.setTarget(pywikibot.ItemPage(site, link_rot_id))
         prop.qualifiers[deprecated_reason_prop].append(
-            ExtraQualifier(deprecated_reason, skip_if_conflicting_exists=True)
+            ExtraQualifier(
+                deprecated_reason, on_conflict=QualifierResolutionChoice.SKIP
+            )
         )

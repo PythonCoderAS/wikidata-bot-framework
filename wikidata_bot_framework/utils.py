@@ -1,8 +1,18 @@
+from datetime import timedelta
 import re
 import secrets
 from collections import defaultdict
 from copy import copy
-from typing import Iterable, List, Literal, Mapping, MutableMapping, Union, overload
+from typing import (
+    Iterable,
+    List,
+    Literal,
+    Mapping,
+    MutableMapping,
+    Union,
+    overload,
+    Sequence,
+)
 from typing_extensions import Self
 
 import pywikibot
@@ -412,3 +422,183 @@ def qualifiers_equal(
         if not found_match:
             return False
     return True
+
+
+def get_precision_range(
+    time: pywikibot.WbTime,
+) -> tuple[pywikibot.WbTime, pywikibot.WbTime]:
+    """Get the range of WbTimes for a given time and precision, where the given time is in the range
+    (start <= time < end).
+
+    :param time: The time to be compared.
+    :return: A tuple containing (start, end)
+    """
+    start = time.normalize()
+    end: pywikibot.WbTime = time.normalize()  # Copy of start for now
+
+    if time.precision == pywikibot.WbTime.PRECISION["1000000000"]:
+        end.year += 1000000000
+    elif time.precision == pywikibot.WbTime.PRECISION["100000000"]:
+        end.year += 100000000
+    elif time.precision == pywikibot.WbTime.PRECISION["10000000"]:
+        end.year += 10000000
+    elif time.precision == pywikibot.WbTime.PRECISION["1000000"]:
+        end.year += 1000000
+    elif time.precision == pywikibot.WbTime.PRECISION["100000"]:
+        end.year += 100000
+    elif time.precision == pywikibot.WbTime.PRECISION["10000"]:
+        end.year += 10000
+    elif time.precision == pywikibot.WbTime.PRECISION["millennium"]:
+        end.year += 1000
+    elif time.precision == pywikibot.WbTime.PRECISION["century"]:
+        end.year += 100
+    elif time.precision == pywikibot.WbTime.PRECISION["decade"]:
+        end.year += 10
+    elif time.precision == pywikibot.WbTime.PRECISION["year"]:
+        end.year += 1
+    elif time.precision == pywikibot.WbTime.PRECISION["month"]:
+        if time.month == 12:
+            end.year += 1
+            end.month = 1
+        else:
+            end.month += 1
+    elif time.precision >= pywikibot.WbTime.PRECISION["day"]:
+        end_ts = end.toTimestamp()
+        if time.precision == pywikibot.WbTime.PRECISION["day"]:
+            end_ts += timedelta(days=1)
+        elif time.precision == pywikibot.WbTime.PRECISION["hour"]:
+            end_ts += timedelta(hours=1)
+        elif time.precision == pywikibot.WbTime.PRECISION["minute"]:
+            end_ts += timedelta(minutes=1)
+        elif time.precision == pywikibot.WbTime.PRECISION["second"]:
+            end_ts += timedelta(seconds=1)
+        else:
+            raise ValueError(f"Unknown precision: {time.precision}")
+        end = pywikibot.WbTime.fromTimestamp(end_ts)
+    else:
+        raise ValueError(f"Unknown precision: {time.precision}")
+    return start, end
+
+
+def more_specific_times(
+    first: pywikibot.WbTime,
+    second: pywikibot.WbTime,
+) -> pywikibot.WbTime | None:
+    """Return which of the two times are more specific.
+
+    If they have no overlap (such as one time is the year 2021 and the other time is 05/15/2020), return None.
+
+    If they are the same precision and value (such as both being the year 2020), return None.
+
+    :param first: The first time to be compared.
+    :param second:  The second time to be compared.
+    :return: The more specific time or None if there is no overlap or if they are the same.
+    """
+    if first.precision == second.precision:
+        return None
+    elif first.precision > second.precision:
+        second_start, second_end = get_precision_range(second)
+        if second_start <= first < second_end:
+            # This check means that first is more precise and fits in second's bounds
+            # Example: first = 05/05/2020, second = 2020
+            # second_start = 01/01/2020, second_end = 01/01/2021
+            return first
+        else:
+            return None
+    else:
+        # This is the elif branch flipped around
+        first_start, first_end = get_precision_range(first)
+        if first_start <= second < first_end:
+            return second
+        else:
+            return None
+
+
+def more_specific_quantities(
+    first: pywikibot.WbQuantity,
+    second: pywikibot.WbQuantity,
+) -> pywikibot.WbQuantity | None:
+    """Return which of the two quantities are more specific
+    (has aa smaller delta between upperBound/lowerBound and the value).
+
+    If they have the same delta (or both are None), return None.
+
+    If the value is different, return None.
+
+    :param first: The first quantity to be compared.
+    :param second: The second quantity to be compared.
+    :return: The more specific quantity or None if there is no more specific quantity.
+    """
+    if first.amount != second.amount:
+        return None
+    if first.amount is None or second.amount is None:
+        return None
+    first_lower_delta = (
+        first.amount - first.lowerBound if first.lowerBound is not None else None
+    )
+    first_upper_delta = (
+        first.upperBound - first.amount if first.upperBound is not None else None
+    )
+    if first_lower_delta is None or first_upper_delta is None:
+        assert first_lower_delta == first_upper_delta
+    second_lower_delta = (
+        second.amount - second.lowerBound if second.lowerBound is not None else None
+    )
+    second_upper_delta = (
+        second.upperBound - second.amount if second.upperBound is not None else None
+    )
+    if second_lower_delta is None or second_upper_delta is None:
+        assert second_lower_delta == second_upper_delta
+    if first_lower_delta is None and second_lower_delta is None:
+        return None  # Both are unknown delts
+    elif first_lower_delta is None and second_lower_delta is not None:
+        return second  # First is unknown, second is known AKA more specific
+    elif first_lower_delta is not None and second_lower_delta is None:
+        return first  # Second is unknown, first is known AKA more specific
+    else:
+        assert first_lower_delta is not None
+        assert second_lower_delta is not None
+        assert first_upper_delta is not None
+        assert second_upper_delta is not None
+        if (
+            first_lower_delta > second_lower_delta
+            and first_upper_delta > second_upper_delta
+        ):
+            return second  # Second has smaller delta AKA more specific
+        elif (
+            first_lower_delta < second_lower_delta
+            and first_upper_delta < second_upper_delta
+        ):
+            return first
+        else:
+            return None  # The upper and lower deltas are different so can't make a choice automatically
+
+
+class ReferenceDict[K, V](MutableMapping[K, V]):
+    """A Dictionary like class that stores data by using the exact reference (id(key)) as the key.
+    This allows storing unhashable objects as keys.
+    """
+
+    def __init__(self, data: Sequence[tuple[K, V]] | None = None):
+        self._data: dict[int, V] = {}
+        self._keys: dict[int, K] = {}
+        if data:
+            self.update(data)
+
+    def __getitem__(self, item: K, /) -> V:
+        key = id(item)
+        return self._data[key]
+
+    def __setitem__(self, key: K, value: V, /) -> None:
+        self._data[id(key)] = value
+        self._keys[id(key)] = key
+
+    def __delitem__(self, key: K, /) -> None:
+        self._data.pop(id(key))
+        self._keys.pop(id(key))
+
+    def __iter__(self):
+        return iter(self._keys.values())
+
+    def __len__(self) -> int:
+        return len(self._data)

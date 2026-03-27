@@ -1,9 +1,10 @@
 from enum import Enum, auto
-from typing import Any, TypedDict
+from typing import TypedDict
 
 import pywikibot
+from typing_extensions import deprecated
 
-from .dataclasses import WikidataReference
+from .dataclasses import WikidataReference, PossibleValueType
 
 
 class ProcessReason(Enum):
@@ -78,11 +79,12 @@ class ReplaceValueContext(TypedDict):
     """This is the claim that has its value changed."""
     new_claim: pywikibot.Claim
     """This is the claim that had the value that was changed."""
-    old_value: Any
+    old_value: PossibleValueType
 
 
 class DeleteValuesContext(TypedDict):
     deleted_claims: list[pywikibot.Claim]
+    kept_claims: list[pywikibot.Claim]
 
 
 class ReplaceQualifierValueContext(TypedDict):
@@ -90,13 +92,17 @@ class ReplaceQualifierValueContext(TypedDict):
     """This is the qualifier that has its value changed."""
     new_qualifier: pywikibot.Claim
     """This is the qualifier that had the value that was changed."""
-    old_value: Any
+    old_value: PossibleValueType
 
 
 class DeleteQualifierValuesContext(TypedDict):
     deleted_qualifiers: list[pywikibot.Claim]
+    kept_qualifiers: list[pywikibot.Claim]
 
 
+@deprecated(
+    "These events are no longer sent. They are now sent as MissingValue events."
+)
 class NewClaimFromQualifierContext(TypedDict):
     old_claim: pywikibot.Claim
 
