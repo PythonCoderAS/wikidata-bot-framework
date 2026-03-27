@@ -587,9 +587,10 @@ class PropertyAdderBot(ABC):
         """
         first_target: PossibleValueType = first_claim.getTarget()
         second_target: PossibleValueType = second_claim.getTarget()
-        first_target_type = type(first_target)
-        second_target_type = type(second_target)
-        if first_target_type != second_target_type:
+        if not (
+            isinstance(first_target, type(second_target))
+            or isinstance(second_target, type(first_target))
+        ):
             return False
         if isinstance(first_target, pywikibot.WbTime):
             assert isinstance(second_target, pywikibot.WbTime)
